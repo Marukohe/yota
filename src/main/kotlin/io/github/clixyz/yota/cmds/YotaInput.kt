@@ -17,6 +17,7 @@ class YotaInput : Command {
         "\n" +
         "usage: \n" +
         "  yota input tap -x <x> -y <y>\n" +
+        "  yota input longtap -x <x> -y <y>\n" +
         "  yota input swipe --from-x <from-x> \n" +
         "                   --from-y <from-y> \n" +
         "                   --to-x <to-x> \n" +
@@ -47,6 +48,7 @@ class YotaInput : Command {
     private fun parse(type: String, args: Array<String>): YotaEvent? {
         return when (type) {
             "TAP", "tap" -> toTapEvent(args)
+            "LONGTAP", "longtap" -> toLongTapEvent(args)
             "SWIPE", "swipe" -> toSwipeEvent(args)
             "KEY", "key" -> toKeyEvent(args)
             "TEXT", "text" -> toTextEvent(args)
@@ -100,6 +102,34 @@ class YotaInput : Command {
             }
 
             else -> return YotaTapEvent(x, y)
+        }
+    }
+
+    private fun toLongTapEvent(args: Array<String>): YotaEvent? {
+        val parser = OptParser(args)
+        var x: Int? = null
+        var y: Int? = null
+
+        for (opt in parser) {
+            if (opt == "-x") {
+                x = parser.getTyped(opt, Integer::parseInt)
+            } else if (opt == "-y") {
+                y = parser.getTyped(opt, Integer::parseInt)
+            }
+        }
+
+        return when {
+            x == null -> {
+                Logger.e("-x is not provided, use -x to provide an x coordinate")
+                null
+            }
+
+            y == null -> {
+                Logger.e("-y is not provided, use -y to provide a y coordinate")
+                null
+            }
+
+            else -> return YotaLongTapEvent(x, y)
         }
     }
 

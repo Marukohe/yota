@@ -2,6 +2,7 @@ package io.github.clixyz.yota.droid.delegates
 
 import android.content.Context
 import android.hardware.input.IInputManager
+import android.hardware.input.InputManager
 import android.os.ServiceManager
 import android.os.SystemClock
 import android.view.*
@@ -24,9 +25,7 @@ class ImsDelegate(private val im: IInputManager)
             }
         }
 
-        const val INJECT_EVENT_ASYNC = 0
-        const val INJECT_EVENT_WAIT_FOR_RESULT = 1
-        const val INJECT_EVENT_WAIT_FOR_FINISH = 2
+        val LONG_TAP_TIMEOUT = ViewConfiguration.getLongPressTimeout().toLong()
     }
 
     private val keyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
@@ -34,6 +33,7 @@ class ImsDelegate(private val im: IInputManager)
     // tap
 
     fun tap(x: Int, y: Int): Boolean {
+        ViewConfiguration.getLongPressTimeout()
         val downAt = SystemClock.uptimeMillis()
         if (tapDown(x, y, downAt)) {
             val upAt = SystemClock.uptimeMillis()
@@ -61,6 +61,18 @@ class ImsDelegate(private val im: IInputManager)
                 MotionEvent.ACTION_MOVE, x.toFloat(), y.toFloat(), 1)
         event.source = InputDevice.SOURCE_TOUCHSCREEN
         return injectInputEventWaitForFinish(event)
+    }
+
+    // long tap
+
+    fun longTap(x: Int, y: Int): Boolean {
+        val downAt = SystemClock.uptimeMillis()
+        if (tapDown(x, y, downAt)) {
+            SystemClock.sleep(LONG_TAP_TIMEOUT)
+            val upAt = System.currentTimeMillis()
+            return tapUp(x, y, downAt, upAt)
+        }
+        return false
     }
 
     // swipe
@@ -140,7 +152,7 @@ class ImsDelegate(private val im: IInputManager)
 
     private fun injectInputEventWaitForFinish(event: InputEvent): Boolean {
         return try {
-            im.injectInputEvent(event, INJECT_EVENT_WAIT_FOR_FINISH) // 2 for
+            im.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
         } finally {
             event.recycle()
         }
