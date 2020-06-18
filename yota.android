@@ -1,0 +1,17 @@
+#! /system/bin/sh
+
+if [ "$1" = "serverd" ]
+then
+    # for unknown reasons, nohup hangs adb shell,
+    # use daemonize instead, however, this command
+    # is not always existing in any devices
+    daemonize -f /data/local/tmp/yota.log /system/bin/app_process \
+        -cp /data/local/tmp/yota.jar \
+        /data/local/tmp/ \
+        io.github.clixyz.yota.YotaKt server
+else
+    /system/bin/app_process \
+        -cp /data/local/tmp/yota.jar \
+        /data/local/tmp/ \
+        io.github.clixyz.yota.YotaKt $*
+fi

@@ -1,0 +1,18 @@
+#! /bin/bash
+
+set -e
+
+emu=""
+if [[ 0 != $# ]]; then
+  emu="-s $1"
+fi
+
+echo "======= Assemble the package"
+./gradlew assemble
+
+echo "======= Compile jar to dex"
+d8 --output build/yota.jar build/libs/yota-0.1.jar
+
+echo "======= Install yota to device"
+adb $emu push build/yota.jar /data/local/tmp/yota.jar
+adb $emu push yota.android /data/local/tmp/yota
