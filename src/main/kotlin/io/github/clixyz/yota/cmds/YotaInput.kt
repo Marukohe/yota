@@ -1,17 +1,18 @@
 package io.github.clixyz.yota.cmds
 
+import android.support.test.uiautomator.By
 import android.view.KeyEvent
 import io.github.clixyz.yota.utils.*
 import android.view.KeyEvent.keyCodeFromString
+import io.github.clixyz.yota.droid.Droid
 import io.github.clixyz.yota.events.*
 import io.github.clixyz.yota.utils.OptParser
 import io.github.clixyz.yota.utils.accessors.getTyped
 import io.github.clixyz.yota.utils.accessors.sliceArray
-import org.json.simple.JSONObject
+import java.util.regex.Pattern
 
 class YotaInput : Command {
-    override val name: String
-        get() = "input"
+    override val name: String = "input"
     override val usage: String by lazy {
         "input: an adb-input alike tool\n" +
         "\n" +
@@ -24,7 +25,22 @@ class YotaInput : Command {
         "                   --to-y <to-y> \n" +
         "                   --steps <steps>\n" +
         "  yota input key <key>\n" +
-        "  yota input text <text>"
+        "  yota input text <text>\n" +
+        "  yota input view --type <tap|longtap>\n" +
+        "                  [--idx <index>]\n" +
+        "                  [--cls <cls>] [--cls-matches <regexp>]\n" +
+        "                  [--pkg <pkg>] [--pkg-matches <regexp>]\n" +
+        "                  [--txt <text>] [--txt-matches <regexp>] [--txt-contains <str>]\n" +
+        "                  [--txt-starts-with <str>] [--txt-ends-with <str>]\n" +
+        "                  [--desc <desc>] [--desc-matches <regexp>] [--desc-contains <str>]\n" +
+        "                  [--desc-starts-with <str>] [--desc-ends-with <str>]\n" +
+        "                  [--res-id <id>] [--res-id-matches <regexp>]\n" +
+        "                  [--clickable] [--long-clickable]\n" +
+        "                  [--checkable] [--checked]\n" +
+        "                  [--focusable] [--focused]\n" +
+        "                  [--scrollable]\n" +
+        "                  [--selected]\n" +
+        "                  [--enabled]\n"
     }
 
     companion object {
@@ -52,6 +68,7 @@ class YotaInput : Command {
             "SWIPE", "swipe" -> toSwipeEvent(args)
             "KEY", "key" -> toKeyEvent(args)
             "TEXT", "text" -> toTextEvent(args)
+            "VIEW", "view" -> toViewEvent(args)
             else -> NotYotaEvent
         }
     }
@@ -193,6 +210,65 @@ class YotaInput : Command {
 
     private fun toTextEvent(args: Array<String>): YotaEvent? {
         return YotaTextEvent(args.joinToString(" "))
+    }
+
+    private fun toViewEvent(args: Array<String>): YotaEvent? {
+        val parser = OptParser(args)
+        val selector = By.newSelector()
+        var type: String? = null
+        try {
+            for (opt in parser) {
+                when (opt) {
+                    "--type" -> type = parser.get(opt)
+                    "--idx" -> selector.index(Integer.parseInt(parser.get(opt)))
+                    "--cls" -> selector.clazz(parser.get(opt))
+                    "--cls-matches" -> selector.clazz(Pattern.compile(parser.get(opt)!!))
+                    "--pkg" -> selector.pkg(parser.get(opt))
+                    "--pkg-matches" -> selector.pkg(Pattern.compile(parser.get(opt)!!))
+                    "--txt" -> selector.text(parser.get(opt))
+                    "--txt-matches" -> selector.text(Pattern.compile(parser.get(opt)!!))
+                    "--txt-starts-with" -> selector.textStartsWith(parser.get(opt))
+                    "--txt-ends-with" -> selector.textEndsWith(parser.get(opt))
+                    "--txt-contains" -> selector.textContains(parser.get(opt))
+                    "--desc" -> selector.desc(parser.get(opt))
+                    "--desc-matches" -> selector.desc(Pattern.compile(parser.get(opt)!!))
+                    "--desc-starts-with" -> selector.descStartsWith(parser.get(opt))
+                    "--desc-ends-with" -> selector.descEndsWith(parser.get(opt))
+                    "--desc-contains" -> selector.descContains(parser.get(opt))
+                    "--res-id" -> selector.res(parser.get(opt))
+                    "--res-id-matches" -> selector.res(Pattern.compile(parser.get(opt)!!))
+                    "--clickable" -> selector.clickable(true)
+                    "--long-clickable" -> selector.longClickable(true)
+                    "--checkable" -> selector.checkable(true)
+                    "--checked" -> selector.checked(true)
+                    "--focusable" -> selector.focusable(true)
+                    "--focused" -> selector.focused(true)
+                    "--scrollable" -> selector.scrollable(true)
+                    "--enabled" -> selector.enabled(true)
+                    "--selected" -> selector.selected(true)
+                }
+            }
+            if (type == null) {
+                Logger.e("Use type to specify an type")
+                return null
+            }
+            val view = Droid.exec { it.ua.findView(selector) }
+            if (view == null) {
+                Logger.e("No such view found")
+                return null
+            }
+            return when (type) {
+                "tap" -> YotaTapViewEvent(view)
+                "longtap" -> YotaLongTapViewEvent(view)
+                else -> {
+                    Logger.e("No such view event type $type")
+                    null
+                }
+            }
+        } catch (t: Throwable) {
+            t.message?.also(Logger::e)
+            return null
+        }
     }
 
     private object NotYotaEvent : YotaEvent {

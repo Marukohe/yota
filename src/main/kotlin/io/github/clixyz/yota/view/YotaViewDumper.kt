@@ -1,4 +1,4 @@
-package io.github.clixyz.yota.ui
+package io.github.clixyz.yota.view
 
 import android.graphics.Rect
 import org.json.simple.JSONObject

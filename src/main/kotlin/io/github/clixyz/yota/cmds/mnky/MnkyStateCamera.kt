@@ -20,17 +20,15 @@ class MnkyStateCamera {
         const val SCREENSHOT_FAILED_IO_EXCEPTION = 2
     }
 
-    fun capture(ua: UiAutoDelegate, to: String): Int {
-        try {
-            ua.dump(to)
-        } catch (e: UiAutoDelegate.NullRootException) {
-            return CAPTURE_FAILED_NULL_ROOT_EXCEPTION
-        } catch (e: IOException) {
-            return CAPTURE_FAILED_IO_EXCEPTION
-        } catch (e: Exception) {
-            return CAPTURE_FAILED
-        }
-        return CAPTURE_SUCCEEDED
+    fun capture(ua: UiAutoDelegate, to: String): Int = try {
+        ua.dump(to)
+        CAPTURE_SUCCEEDED
+    } catch (e: UiAutoDelegate.NullRootException) {
+        CAPTURE_FAILED_NULL_ROOT_EXCEPTION
+    } catch (e: IOException) {
+        CAPTURE_FAILED_IO_EXCEPTION
+    } catch (e: Exception) {
+        CAPTURE_FAILED
     }
 
     fun takeScreenshot(ua: UiAutoDelegate, to: String): Int {

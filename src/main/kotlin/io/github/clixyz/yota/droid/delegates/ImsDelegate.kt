@@ -15,13 +15,11 @@ class ImsDelegate(private val im: IInputManager)
         val FETCHER = object : DroidDelegate.SingletonFetcher<ImsDelegate>() {
 
             @Throws(DroidDelegate.UnableToFetchException::class)
-            override fun doFetch(): ImsDelegate {
-                val im = try {
-                    IInputManager.Stub.asInterface(ServiceManager.getService(Context.INPUT_SERVICE))
-                } catch (t: Throwable) {
-                    throw DroidDelegate.UnableToFetchException("input manager service")
-                }
-                return ImsDelegate(im)
+            override fun doFetch(): ImsDelegate = try {
+                ImsDelegate(IInputManager.Stub.asInterface(
+                        ServiceManager.getService(Context.INPUT_SERVICE)))
+            } catch (t: Throwable) {
+                throw DroidDelegate.UnableToFetchException("input manager service")
             }
         }
 

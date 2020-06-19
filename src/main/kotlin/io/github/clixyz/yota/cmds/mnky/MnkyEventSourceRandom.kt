@@ -5,10 +5,10 @@ import android.graphics.Rect
 import android.view.KeyEvent
 import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
 import io.github.clixyz.yota.events.*
-import io.github.clixyz.yota.ui.YotaView
-import io.github.clixyz.yota.ui.accessors.YotaViewFilter
-import io.github.clixyz.yota.ui.accessors.YotaViewOrder
-import io.github.clixyz.yota.ui.accessors.accept
+import io.github.clixyz.yota.view.YotaView
+import io.github.clixyz.yota.view.accessors.YotaViewFilter
+import io.github.clixyz.yota.view.accessors.YotaViewOrder
+import io.github.clixyz.yota.view.accessors.accept
 import io.github.clixyz.yota.utils.Logger
 import io.github.clixyz.yota.utils.TextFuzzer
 

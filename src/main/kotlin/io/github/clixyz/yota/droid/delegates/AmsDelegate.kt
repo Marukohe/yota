@@ -14,12 +14,10 @@ class AmsDelegate(private val am: IActivityManager)
             get() = object : DroidDelegate.SingletonFetcher<AmsDelegate>() {
 
                 @Throws(DroidDelegate.UnableToFetchException::class)
-                override fun doFetch(): AmsDelegate {
-                    return try {
-                        AmsDelegate(ActivityManagerNative.getDefault())
-                    } catch (t: Throwable) {
-                        throw DroidDelegate.UnableToFetchException("activity manager service")
-                    }
+                override fun doFetch(): AmsDelegate = try {
+                    AmsDelegate(ActivityManagerNative.getDefault())
+                } catch (t: Throwable) {
+                    throw DroidDelegate.UnableToFetchException("activity manager service")
                 }
             }
     }
@@ -31,21 +29,17 @@ class AmsDelegate(private val am: IActivityManager)
     }
 
     val foregroundAppName: String?
-    get() {
-        return topActivity?.packageName
-    }
+    get() = topActivity?.packageName
 
     val topActivity: ComponentName?
-    get() {
-        return try {
-            val tasks = am.getTasks(2, 0)
-            if (tasks.size < 1) {
-                null
-            } else {
-                tasks[0].topActivity
-            }
-        } catch (e: RemoteException) {
+    get() = try {
+        val tasks = am.getTasks(2, 0)
+        if (tasks.size < 1) {
             null
+        } else {
+            tasks[0].topActivity
         }
+    } catch (e: RemoteException) {
+        null
     }
 }

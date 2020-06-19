@@ -5,13 +5,16 @@ import android.app.UiAutomation
 import android.app.UiAutomationConnection
 import android.graphics.Bitmap
 import android.os.HandlerThread
+import android.support.test.uiautomator.ByMatcher
+import android.support.test.uiautomator.BySelector
+import android.support.test.uiautomator.UiDevice
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.uiautomator.core.AccessibilityNodeInfoHelper
-import io.github.clixyz.yota.ui.YotaView
-import io.github.clixyz.yota.ui.YotaViewDumper
-import io.github.clixyz.yota.ui.accessors.YotaViewFilter
-import io.github.clixyz.yota.ui.accessors.YotaViewOrder
-import io.github.clixyz.yota.ui.accessors.accept
+import io.github.clixyz.yota.view.YotaView
+import io.github.clixyz.yota.view.YotaViewDumper
+import io.github.clixyz.yota.view.accessors.YotaViewFilter
+import io.github.clixyz.yota.view.accessors.YotaViewOrder
+import io.github.clixyz.yota.view.accessors.accept
 import java.io.*
 
 object UiAutoDelegate {
@@ -68,6 +71,32 @@ object UiAutoDelegate {
         if (connected) {
             ua.disconnect()
             ht.quit()
+        }
+    }
+
+    @Throws(
+        HasNotConnectedException::class,
+        NullRootException::class
+    )
+    fun findView(selector: BySelector): YotaView? {
+        mustConnected()
+        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
+        val node = ByMatcher.findMatch(UiDevice.getInstance(), selector, root)
+        return node?.let { YotaView(it) }
+    }
+
+    @Throws(
+        HasNotConnectedException::class,
+        NullRootException::class
+    )
+    fun findViews(selector: BySelector): List<YotaView> {
+        mustConnected()
+        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
+        val nodes = ByMatcher.findMatches(UiDevice.getInstance(), selector, root)
+        if (nodes.isEmpty()) {
+            return arrayListOf()
+        } else {
+            return nodes.map { n -> YotaView(n) }
         }
     }
 

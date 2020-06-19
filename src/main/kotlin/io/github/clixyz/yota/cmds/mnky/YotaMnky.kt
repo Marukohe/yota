@@ -15,8 +15,7 @@ import io.github.clixyz.yota.utils.OptParser
 import java.io.PrintStream
 
 class YotaMnky(val stateDir: String) : Command {
-    override val name: String
-        get() = "mnky"
+    override val name: String = "mnky"
     override val usage: String by lazy {
         "mnky: a monkey-like tool that removes redundant events\n" +
         "\n" +

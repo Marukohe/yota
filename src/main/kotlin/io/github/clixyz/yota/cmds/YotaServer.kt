@@ -14,8 +14,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 class YotaServer : Command {
-    override val name: String
-        get() = "server"
+    override val name: String = "server"
     override val usage: String by lazy {
         "server: start server at " + SERVER_PORT + " and accept commands\n" +
         "\n" +

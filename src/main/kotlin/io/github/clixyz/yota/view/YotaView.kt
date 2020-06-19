@@ -1,4 +1,4 @@
-package io.github.clixyz.yota.ui
+package io.github.clixyz.yota.view
 
 import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
@@ -29,142 +29,142 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         }
 
     val srcNodeId: Long
-        get() {
-            cannotRecycled()
-            return node!!.sourceNodeId
-        }
+    get() {
+        cannotRecycled()
+        return node!!.sourceNodeId
+    }
 
     val pkg: String
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.packageName)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.packageName)
+    }
 
     val cls: String
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.className)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.className)
+    }
 
     val text: String
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.text)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.text)
+    }
 
     val desc: String
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.contentDescription)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.contentDescription)
+    }
 
     val resId: String
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.viewIdResourceName)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.viewIdResourceName)
+    }
 
     val bounds: Rect?
-		get() {
-            cannotRecycled()
-            return AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node)
-        }
+    get() {
+        cannotRecycled()
+        return AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node)
+    }
 
     val enabled: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isEnabled
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isEnabled
+    }
 
     val clickable: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isClickable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isClickable
+    }
 
     val longClickable: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isLongClickable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isLongClickable
+    }
 
     val contextClickable: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isContextClickable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isContextClickable
+    }
 
     val scrollable: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isScrollable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isScrollable
+    }
 
     val checkable: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isCheckable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isCheckable
+    }
 
     val checked: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isChecked
+    get() {
+        cannotRecycled()
+        return node!!.isChecked
     }
 
     val editable: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isEditable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isEditable
+    }
 
     val focusable: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isFocusable
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isFocusable
+    }
 
     val focused: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isFocused
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isFocused
+    }
 
     val password: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isPassword
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isPassword
+    }
 
     val selected: Boolean
-		get() {
-            cannotRecycled()
-            return node!!.isSelected
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isSelected
+    }
 
     val visible: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isVisibleToUser
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isVisibleToUser
+    }
 
     val importantForA11n: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isImportantForAccessibility
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isImportantForAccessibility
+    }
 
     val contentInvalid: Boolean
-        get() {
-            cannotRecycled()
-            return node!!.isContentInvalid
-        }
+    get() {
+        cannotRecycled()
+        return node!!.isContentInvalid
+    }
 
     val attrPath: AttrPath
-		get() {
-            cannotRecycled()
-            return attrPath(-1)
-        }
+    get() {
+        cannotRecycled()
+        return attrPath(-1)
+    }
 
     fun attrPath(len: Int): AttrPath {
         cannotRecycled()
@@ -201,8 +201,28 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         }
     }
 
+    fun longTap(): Boolean {
+        cannotRecycled()
+        val bounds = node!!.boundsInScreen ?: return false
+        return Droid.exec { it.im.longTap(bounds.centerX(), bounds.centerY()) }
+    }
+
+    fun longTap(offX: Int, offY: Int): Boolean {
+        cannotRecycled()
+
+        val bounds = node!!.boundsInScreen ?: return false
+
+        val x = bounds.left + offX
+        val y = bounds.top + offY
+
+        return when {
+            bounds.left < x || bounds.right > x -> false
+            bounds.top < y || bounds.bottom > y -> false
+            else -> Droid.exec { it.im.longTap(x, y) }
+        }
+    }
+
     fun recycle() {
-        tap(1, 1)
         node!!.recycle()
         node = null
     }

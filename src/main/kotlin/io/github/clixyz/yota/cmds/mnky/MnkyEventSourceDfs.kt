@@ -7,10 +7,10 @@ import io.github.clixyz.yota.events.YotaEvent
 import io.github.clixyz.yota.events.YotaKeyEvent
 import io.github.clixyz.yota.events.YotaTapEvent
 import io.github.clixyz.yota.events.YotaViewCompoundEvent
-import io.github.clixyz.yota.ui.YotaView
-import io.github.clixyz.yota.ui.accessors.YotaViewFilter
-import io.github.clixyz.yota.ui.accessors.YotaViewOrder
-import io.github.clixyz.yota.ui.accessors.accept
+import io.github.clixyz.yota.view.YotaView
+import io.github.clixyz.yota.view.accessors.YotaViewFilter
+import io.github.clixyz.yota.view.accessors.YotaViewOrder
+import io.github.clixyz.yota.view.accessors.accept
 import java.util.*
 
 class MnkyEventSourceDfs(

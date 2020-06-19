@@ -1,6 +1,6 @@
-package io.github.clixyz.yota.ui.accessors
+package io.github.clixyz.yota.view.accessors
 
-import io.github.clixyz.yota.ui.YotaView
+import io.github.clixyz.yota.view.YotaView
 import java.util.LinkedList
 
 //
@@ -60,5 +60,3 @@ class YotaViewFilter(val cond: (view: YotaView) -> Boolean)
         }
     }
 }
-
-// TODO delete a11n dumper, and put dump logic here

@@ -11,8 +11,7 @@ import org.nanohttpd.protocols.http.response.Status
 import java.io.IOException
 
 class YotaDump : Command, YotaServer.Handle {
-    override val name: String
-        get() = "dump"
+    override val name: String = "dump"
     override val usage: String by lazy {
         "dump: dump ui hierarchy to an output file\n" +
         "\n" +
