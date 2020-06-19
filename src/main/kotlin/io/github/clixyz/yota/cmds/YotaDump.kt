@@ -28,10 +28,10 @@ class YotaDump : Command, YotaServer.Handle {
 
     companion object {
         val SUCCEEDED = Command.Status(0, "succeeded")
-        val FAILED_INSUFFICIENT_ARGS = Command.Status(-1, "args are insufficient")
-        val FAILED_ROOT_IS_NULL = Command.Status(-3, "failed to get system window: is null")
-        val FAILED_IO_EXCEPTION = Command.Status(-4, "io exception happened")
-        val FAILED_EXCEPTION = Command.Status(-4, "exception happened")
+        val FAILED_INSUFFICIENT_ARGS = Command.Status(1, "args are insufficient")
+        val FAILED_ROOT_IS_NULL = Command.Status(2, "failed to get system window: is null")
+        val FAILED_IO_EXCEPTION = Command.Status(3, "io exception happened")
+        val FAILED_EXCEPTION = Command.Status(4, "exception happened")
     }
 
     override fun exec(args: Array<String>): Command.Status {

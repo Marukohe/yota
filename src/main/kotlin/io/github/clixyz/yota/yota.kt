@@ -8,6 +8,7 @@ import io.github.clixyz.yota.utils.Command
 import io.github.clixyz.yota.utils.Logger
 import io.github.clixyz.yota.utils.accessors.sliceArray
 import java.io.PrintStream
+import kotlin.system.exitProcess
 
 private val HELP_COMMAND = object : Command {
     override val name: String
@@ -63,21 +64,22 @@ fun main(args: Array<String>) {
     try {
         if (args.isEmpty()) {
             showUsage(System.err)
-            System.exit(1)
+            exitProcess(1)
         }
 
         val name = args[0]
         for (cmd in COMMANDS) {
             if (name == cmd.name) {
-                System.exit(cmd.exec(args.sliceArray(1)).code)
+                exitProcess(cmd.exec(args.sliceArray(1)).code)
             }
         }
 
         Logger.e("No such command: $name")
         showUsage(System.err)
 
-        System.exit(1)
+        exitProcess(1)
     } catch (t: Throwable) {
-        t.printStackTrace()
+        t.message?.also(Logger::e)
+        Logger.e(t.stackTrace)
     }
 }

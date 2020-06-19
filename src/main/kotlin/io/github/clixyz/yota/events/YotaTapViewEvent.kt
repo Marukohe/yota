@@ -1,17 +1,13 @@
 package io.github.clixyz.yota.events
 
-import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
+import android.support.test.uiautomator.BySelector
 import io.github.clixyz.yota.view.YotaView
 
-open class YotaTapViewEvent(view: YotaView) : YotaViewEvent(view) {
+open class YotaTapViewEvent(selector: BySelector) : YotaViewEvent(selector) {
 
-    override fun inject(): Int = try {
-        if (view.tap()) {
-            YotaEvent.INJECT_SUCCEEDED
-        } else {
-            YotaEvent.INJECT_FAILED
-        }
-    } catch (x: UiAutoDelegate.NullRootException) {
-        YotaEvent.INJECT_FAILED_NULL_ROOT
+    override fun injectInner(view: YotaView): Int = if (view.tap()) {
+        YotaEvent.INJECT_SUCCEEDED
+    } else {
+        YotaEvent.INJECT_FAILED
     }
 }
