@@ -3,15 +3,15 @@ package io.github.clixyz.yota.events
 import io.github.clixyz.yota.droid.Droid
 
 open class YotaSwipeEvent(
-    val fromX: Int,
-    val fromY: Int,
-    val toX: Int,
-    val toY: Int,
+    val fromX: Float,
+    val fromY: Float,
+    val toX: Float,
+    val toY: Float,
     val steps: Int
 ) : YotaEvent {
 
     companion object {
-        fun mustFailEvent() = YotaSwipeEvent(-1, -1, -1, -1, -1)
+        fun mustFailEvent() = YotaSwipeEvent(-1f, -1f, -1f, -1f, -1)
     }
 
     override fun inject(): Int = if (fromX < 0 || fromY < 0 || toX < 0 || toY < 0 || steps < 0) {

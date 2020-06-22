@@ -99,14 +99,14 @@ class YotaInput : Command {
 
     private fun toTapEvent(args: Array<String>): YotaEvent? {
         val parser = OptParser(args)
-        var x: Int? = null
-        var y: Int? = null
+        var x: Float? = null
+        var y: Float? = null
 
         for (opt in parser) {
             if (opt == "-x") {
-                x = parser.getTyped(opt, Integer::parseInt)
+                x = parser.getTyped(opt, java.lang.Float::parseFloat)
             } else if (opt == "-y") {
-                y = parser.getTyped(opt, Integer::parseInt)
+                y = parser.getTyped(opt, java.lang.Float::parseFloat)
             }
         }
 
@@ -127,14 +127,14 @@ class YotaInput : Command {
 
     private fun toLongTapEvent(args: Array<String>): YotaEvent? {
         val parser = OptParser(args)
-        var x: Int? = null
-        var y: Int? = null
+        var x: Float? = null
+        var y: Float? = null
 
         for (opt in parser) {
             if (opt == "-x") {
-                x = parser.getTyped(opt, Integer::parseInt)
+                x = parser.getTyped(opt, java.lang.Float::parseFloat)
             } else if (opt == "-y") {
-                y = parser.getTyped(opt, Integer::parseInt)
+                y = parser.getTyped(opt, java.lang.Float::parseFloat)
             }
         }
 
@@ -155,18 +155,18 @@ class YotaInput : Command {
 
     private fun toSwipeEvent(args: Array<String>): YotaEvent? {
         val parser = OptParser(args)
-        var fromX: Int? = null
-        var fromY: Int? = null
-        var toX: Int? = null
-        var toY: Int? = null
+        var fromX: Float? = null
+        var fromY: Float? = null
+        var toX: Float? = null
+        var toY: Float? = null
         var steps: Int? = null
 
         for (opt in parser) {
             when (opt) {
-                "--from-x" -> fromX = parser.getTyped(opt, Integer::parseInt)
-                "--from-y" -> fromY = parser.getTyped(opt, Integer::parseInt)
-                "--to-x" -> toX = parser.getTyped(opt, Integer::parseInt)
-                "--to-y" -> toY = parser.getTyped(opt, Integer::parseInt)
+                "--from-x" -> fromX = parser.getTyped(opt, java.lang.Float::parseFloat)
+                "--from-y" -> fromY = parser.getTyped(opt, java.lang.Float::parseFloat)
+                "--to-x" -> toX = parser.getTyped(opt, java.lang.Float::parseFloat)
+                "--to-y" -> toY = parser.getTyped(opt, java.lang.Float::parseFloat)
                 "--steps" -> steps = parser.getTyped(opt, Integer::parseInt)
             }
         }
@@ -223,6 +223,9 @@ class YotaInput : Command {
         val parser = OptParser(args)
         val selector = By.newSelector()
         var type: String? = null
+        var dx: Float? = null
+        var dy: Float? = null
+        var steps: Int? = null
         try {
             for (opt in parser) {
                 when (opt) {
@@ -253,6 +256,9 @@ class YotaInput : Command {
                     "--scrollable" -> selector.scrollable(true)
                     "--enabled" -> selector.enabled(true)
                     "--selected" -> selector.selected(true)
+                    "--dx" -> dx = java.lang.Float.parseFloat(parser.get(opt))
+                    "--dy" -> dy = java.lang.Float.parseFloat(parser.get(opt))
+                    "--steps" -> steps = Integer.parseInt(parser.get(opt))
                 }
             }
             if (type == null) {
@@ -262,6 +268,13 @@ class YotaInput : Command {
             return when (type) {
                 "tap" -> YotaTapViewEvent(selector)
                 "longtap" -> YotaLongTapViewEvent(selector)
+                "swipe" -> {
+                    if (dx == null || dy == null || steps == null) {
+                        Logger.e("No dx, dy, or steps specified for swipe, use --dx, --dy, --steps to specify them")
+                        return null
+                    }
+                    YotaSwipeViewEvent(selector, dx, dy, steps)
+                }
                 else -> {
                     Logger.e("No such view event type $type")
                     null

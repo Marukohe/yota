@@ -2,10 +2,10 @@ package io.github.clixyz.yota.events
 
 import io.github.clixyz.yota.droid.Droid
 
-open class YotaTapEvent(val x: Int, val y: Int) : YotaEvent {
+open class YotaTapEvent(val x: Float, val y: Float) : YotaEvent {
 
     companion object {
-        fun mustFailEvent() = YotaTapEvent(-1, -1)
+        fun mustFailEvent() = YotaTapEvent(-1f, -1f)
     }
 
     override fun inject(): Int = if (x < 0 || y < 0) {

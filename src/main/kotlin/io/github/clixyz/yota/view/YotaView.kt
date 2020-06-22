@@ -183,16 +183,18 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
     fun tap(): Boolean {
         cannotRecycled()
         val bounds = node!!.boundsInScreen ?: return false
-        return Droid.exec { it.im.tap(bounds.centerX(), bounds.centerY()) }
+        return Droid.exec {
+            it.im.tap(bounds.centerX().toFloat(), bounds.centerY().toFloat())
+        }
     }
 
-    fun tap(offX: Int, offY: Int): Boolean {
+    fun tap(offX: Float, offY: Float): Boolean {
         cannotRecycled()
 
         val bounds = node!!.boundsInScreen ?: return false
 
-        val x = bounds.left + offX
-        val y = bounds.top + offY
+        val x = bounds.left.toFloat() + offX
+        val y = bounds.top.toFloat() + offY
 
         return when {
             bounds.left < x || bounds.right > x -> false
@@ -204,10 +206,12 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
     fun longTap(): Boolean {
         cannotRecycled()
         val bounds = node!!.boundsInScreen ?: return false
-        return Droid.exec { it.im.longTap(bounds.centerX(), bounds.centerY()) }
+        return Droid.exec {
+            it.im.longTap(bounds.centerX().toFloat(), bounds.centerY().toFloat())
+        }
     }
 
-    fun longTap(offX: Int, offY: Int): Boolean {
+    fun longTap(offX: Float, offY: Float): Boolean {
         cannotRecycled()
 
         val bounds = node!!.boundsInScreen ?: return false
@@ -219,6 +223,30 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
             bounds.left < x || bounds.right > x -> false
             bounds.top < y || bounds.bottom > y -> false
             else -> Droid.exec { it.im.longTap(x, y) }
+        }
+    }
+
+    fun swipe(dX: Float, dY: Float, steps: Int): Boolean {
+        cannotRecycled()
+        val bounds = node!!.boundsInScreen ?: return false
+        val fromX = bounds.centerX().toFloat()
+        val fromY = bounds.centerY().toFloat()
+        val toX = fromX + dX
+        val toY = fromY + dY
+        return Droid.exec { it.im.swipe(fromX, fromY, toX, toY, steps) }
+    }
+
+    fun swipe(offX: Float, offY: Float, dX: Float, dY: Float, steps: Int): Boolean {
+        cannotRecycled()
+        val bounds = node!!.boundsInScreen ?: return false
+        val fromX = bounds.left + offX
+        val fromY = bounds.top + offY
+        val toX = fromX + dX
+        val toY = fromY + dY
+        return when {
+            bounds.left < fromX || bounds.right > fromX -> false
+            bounds.top < fromY || bounds.bottom > fromY -> false
+            else -> Droid.exec { it.im.swipe(fromX, fromY, toX, toY, steps) }
         }
     }
 

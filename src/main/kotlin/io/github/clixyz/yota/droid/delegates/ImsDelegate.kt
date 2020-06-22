@@ -30,7 +30,7 @@ class ImsDelegate(private val im: IInputManager)
 
     // tap
 
-    fun tap(x: Int, y: Int): Boolean {
+    fun tap(x: Float, y: Float): Boolean {
         ViewConfiguration.getLongPressTimeout()
         val downAt = SystemClock.uptimeMillis()
         if (tapDown(x, y, downAt)) {
@@ -40,30 +40,30 @@ class ImsDelegate(private val im: IInputManager)
         return false
     }
 
-    fun tapDown(x: Int, y: Int, downAt: Long): Boolean {
+    fun tapDown(x: Float, y: Float, downAt: Long): Boolean {
         val event = MotionEvent.obtain(downAt, downAt,
-                MotionEvent.ACTION_DOWN, x.toFloat(), y.toFloat(), 1)
+                MotionEvent.ACTION_DOWN, x, y, 1)
         event.source = InputDevice.SOURCE_TOUCHSCREEN
         return injectInputEventWaitForFinish(event)
     }
 
-    fun tapUp(x: Int, y: Int, downAt: Long, upAt: Long): Boolean {
+    fun tapUp(x: Float, y: Float, downAt: Long, upAt: Long): Boolean {
         val event = MotionEvent.obtain(downAt, upAt,
-                MotionEvent.ACTION_UP, x.toFloat(), y.toFloat(), 1)
+                MotionEvent.ACTION_UP, x, y, 1)
         event.source = InputDevice.SOURCE_TOUCHSCREEN
         return injectInputEventWaitForFinish(event)
     }
 
-    fun tapMove(x: Int, y: Int, downAt: Long, moveAt: Long): Boolean {
+    fun tapMove(x: Float, y: Float, downAt: Long, moveAt: Long): Boolean {
         val event = MotionEvent.obtain(downAt, moveAt,
-                MotionEvent.ACTION_MOVE, x.toFloat(), y.toFloat(), 1)
+                MotionEvent.ACTION_MOVE, x, y, 1)
         event.source = InputDevice.SOURCE_TOUCHSCREEN
         return injectInputEventWaitForFinish(event)
     }
 
     // long tap
 
-    fun longTap(x: Int, y: Int): Boolean {
+    fun longTap(x: Float, y: Float): Boolean {
         val downAt = SystemClock.uptimeMillis()
         if (tapDown(x, y, downAt)) {
             SystemClock.sleep(LONG_TAP_TIMEOUT)
@@ -75,18 +75,18 @@ class ImsDelegate(private val im: IInputManager)
 
     // swipe
 
-    fun swipe(fromX: Int, fromY: Int, toX: Int, toY: Int, steps: Int): Boolean {
+    fun swipe(fromX: Float, fromY: Float, toX: Float, toY: Float, steps: Int): Boolean {
         var ret: Boolean
 
         val downAt = SystemClock.uptimeMillis()
         val swipeSteps = if (steps != 0) steps else 1
-        val xStep = (toX - fromX).toDouble() / swipeSteps
-        val yStep = (toY - fromY).toDouble() / swipeSteps
+        val xStep = (toX - fromX) / swipeSteps
+        val yStep = (toY - fromY) / swipeSteps
 
         // first tap starts exactly at the point requested
         ret = tapDown(fromX, fromY, downAt)
         for (i in 1 until swipeSteps) {
-            ret = ret && tapMove(fromX + (xStep * i).toInt(), fromY + (yStep * i).toInt(),
+            ret = ret && tapMove(fromX + (xStep * i), fromY + (yStep * i),
                     downAt, SystemClock.uptimeMillis())
             if (!ret) {
                 break

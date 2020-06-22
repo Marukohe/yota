@@ -50,6 +50,7 @@ class MnkyEventSourceDfs(
         }
         val bounds = v.bounds ?: return null
         visitedViews.add(v.srcNodeId)
-        return YotaViewCompoundEvent(v, YotaTapEvent(bounds.centerX(), bounds.centerY()))
+        return YotaViewCompoundEvent(v, YotaTapEvent(
+                bounds.centerX().toFloat(), bounds.centerY().toFloat()))
     }
 }

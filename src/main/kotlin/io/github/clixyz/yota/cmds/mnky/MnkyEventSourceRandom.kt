@@ -172,7 +172,7 @@ class MnkyEventSourceRandom(
         // as proxy of its inner ones, so init the click
         // point to center with a proba 0.25 if layout,
         // or 0.75
-        val point = if (v.cls.endsWith("ViewGroup") ||
+        val pair = if (v.cls.endsWith("ViewGroup") ||
                 v.cls.endsWith("Layout") ||
                 v.cls.endsWith("LayoutCompat") ||
                 v.cls.endsWith("RecyclerView") ||
@@ -183,7 +183,7 @@ class MnkyEventSourceRandom(
             getCenterXYWithProbability(rect, 0.75)
         }
 
-        return YotaViewCompoundEvent(v, YotaTapEvent(point.x, point.y))
+        return YotaViewCompoundEvent(v, YotaTapEvent(pair.first, pair.second))
     }
 
     private fun swipeEvent(views: List<YotaView>): YotaViewCompoundEvent {
@@ -221,7 +221,8 @@ class MnkyEventSourceRandom(
         }
         val steps = random.nextInt(10)
 
-        return YotaViewCompoundEvent(v, YotaSwipeEvent(fromX, fromY, toX, toY, steps))
+        return YotaViewCompoundEvent(v, YotaSwipeEvent(
+                fromX.toFloat(), fromY.toFloat(), toX.toFloat(), toY.toFloat(), steps))
     }
 
     private fun textEvent(views: List<YotaView>): YotaViewCompoundEvent {
@@ -251,7 +252,7 @@ class MnkyEventSourceRandom(
         return true
     }
 
-    private fun getCenterXYWithProbability(rect: Rect, p: Double): Point {
+    private fun getCenterXYWithProbability(rect: Rect, p: Double): Pair<Float, Float> {
         val x: Int
         val y: Int
         if (random.nextDouble() < p) {
@@ -263,7 +264,7 @@ class MnkyEventSourceRandom(
             x = rect.left + if (w > 0) random.nextInt(w) else 0
             y = rect.top + if (h > 0) random.nextInt(h) else 0
         }
-        return Point(x, y)
+        return Pair(x.toFloat(), y.toFloat())
     }
 
     data class Proba(
