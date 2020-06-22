@@ -1,7 +1,5 @@
 package io.github.clixyz.yota.utils
 
-import kotlin.reflect.KClass
-
 class OptParser(val args: Array<String>) {
 
     private var parsed = false
@@ -91,9 +89,13 @@ class OptParser(val args: Array<String>) {
         if (nextArg >= args.size) {
             return null
         }
-        val arg = args[nextArg]
-        if (arg.startsWith("-")) {
+        var arg = args[nextArg]
+        if (arg.startsWith("-")) { // next option
             return null
+        } else if (arg.startsWith("\"") && arg.endsWith("\"")) { // wrapped with ""
+            arg = arg.substring(1, arg.length - 1)
+        } else if (arg.startsWith("'") && arg.endsWith("'")) { // wrapped with ''
+            arg = arg.substring(1, arg.length - 1)
         }
         nextArg++
         return arg
@@ -101,7 +103,7 @@ class OptParser(val args: Array<String>) {
 }
 
 fun main(args: Array<String>) {
-    var parse = OptParser("-q1 -w_3 -t 2_3 -e - --a --s 23 --sd 24 -- -p 23 -w 3".split(" "))
+    var parse = OptParser("-q1 -w_3 --neg \"-12\" -t 2_3 -e - --a --s 23 --sd 24 -- -p 23 -w 3".split(" "))
     for (opt in parse) {
         println("$opt => ${parse.get(opt)}")
     }
@@ -109,6 +111,13 @@ fun main(args: Array<String>) {
     println()
 
     parse = OptParser("-p com.example.simon.myapplication -s 0 -P dfs -C 10".split(" "))
+    for (opt in parse) {
+        println("$opt => ${parse.get(opt)}")
+    }
+
+    println()
+
+    parse = OptParser("-x \"208.95996\" -y \"1133.9062\"".split(" "))
     for (opt in parse) {
         println("$opt => ${parse.get(opt)}")
     }
