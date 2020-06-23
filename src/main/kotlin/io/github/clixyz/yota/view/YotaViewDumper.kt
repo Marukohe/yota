@@ -7,7 +7,6 @@ import java.io.PrintStream
 object YotaViewDumper {
 
     fun viewToMap(view: YotaView): Map<String, Any> {
-        val children = view.children.map { child -> viewToMap(child) }
         return mutableMapOf<String, Any>().apply {
             put("index", view.idx)
             put("package", view.pkg)
@@ -28,21 +27,27 @@ object YotaViewDumper {
             put("selected", view.selected)
             put("password", view.password)
             put("enabled", view.enabled)
-            put("bounds", boundsToMap(view.bounds))
-            put("children", children)
+            put("bounds", viewBoundsToMap(view.bounds))
         }
+    }
+
+    fun hierarchyToMap(view: YotaView): Map<String, Any> {
+        val children = view.children.map { child -> hierarchyToMap(child) }
+        val viewMap = viewToMap(view) as MutableMap<String, Any>
+        viewMap["children"] = children
+        return viewMap
     }
 
     fun dump(view: YotaView,
              out: PrintStream = System.out,
              extra: Map<String, String> = mapOf()) {
         out.print(JSONObject(mapOf(
-                "extra" to extra,
-                "hierarchy" to viewToMap(view)
+            "extra" to extra,
+            "hierarchy" to hierarchyToMap(view)
         )).toJSONString())
     }
 
-    private fun boundsToMap(bounds: Rect?): Map<String, Int> {
+    private fun viewBoundsToMap(bounds: Rect?): Map<String, Int> {
         val map = mutableMapOf(
             "left" to -1,
             "right" to -1,

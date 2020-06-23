@@ -2,6 +2,7 @@ package io.github.clixyz.yota
 
 import io.github.clixyz.yota.cmds.YotaDump
 import io.github.clixyz.yota.cmds.YotaInput
+import io.github.clixyz.yota.cmds.YotaSelect
 import io.github.clixyz.yota.cmds.YotaServer
 import io.github.clixyz.yota.cmds.mnky.YotaMnky
 import io.github.clixyz.yota.utils.Command
@@ -49,6 +50,7 @@ private val COMMANDS: Array<Command> = arrayOf(
         YotaServer(),
         YotaDump(),
         YotaInput(),
+        YotaSelect(),
         YotaMnky("/data/local/tmp")
 )
 

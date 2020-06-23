@@ -40,7 +40,8 @@ class YotaInput : Command {
         "                  [--focusable] [--focused]\n" +
         "                  [--scrollable]\n" +
         "                  [--selected]\n" +
-        "                  [--enabled]\n"
+        "                  [--enabled]\n" +
+        "                  [--dx <dx> --dy <dy> --steps <steps>]"
     }
 
     companion object {
