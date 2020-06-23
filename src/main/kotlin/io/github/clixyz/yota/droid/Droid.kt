@@ -1,51 +1,56 @@
 package io.github.clixyz.yota.droid
 
-import io.github.clixyz.yota.droid.delegates.AmsDelegate
-import io.github.clixyz.yota.droid.delegates.ImsDelegate
-import io.github.clixyz.yota.droid.delegates.PmsDelegate
-import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
+import io.github.clixyz.yota.droid.delegates.*
 
 object Droid {
 
     private var amInternal: AmsDelegate? = null
     private var imInternal: ImsDelegate? = null
     private var pmInternal: PmsDelegate? = null
+    private var wmInternal: WmsDelegate? = null
     private var uaInternal: UiAutoDelegate? = null
 
     val am: AmsDelegate
-        @Throws(HasNotInitializeException::class)
-        get() {
-            mustInitialize()
-            return amInternal!!
-        }
+    @Throws(HasNotInitializeException::class)
+    get() {
+        mustInitialize()
+        return amInternal!!
+    }
 
     val im: ImsDelegate
-        @Throws(HasNotInitializeException::class)
-        get() {
-            mustInitialize()
-            return imInternal!!
-        }
+    @Throws(HasNotInitializeException::class)
+    get() {
+        mustInitialize()
+        return imInternal!!
+    }
 
     val pm: PmsDelegate
-        @Throws(HasNotInitializeException::class)
-        get() {
-            mustInitialize()
-            return pmInternal!!
-        }
+    @Throws(HasNotInitializeException::class)
+    get() {
+        mustInitialize()
+        return pmInternal!!
+    }
+
+    val wm: WmsDelegate
+    @Throws(HasNotInitializeException::class)
+    get() {
+        mustInitialize()
+        return wmInternal!!
+    }
 
     val ua: UiAutoDelegate
-        @Throws(HasNotInitializeException::class)
-        get() {
-            mustInitialize()
-            return uaInternal!!
-        }
+    @Throws(HasNotInitializeException::class)
+    get() {
+        mustInitialize()
+        return uaInternal!!
+    }
 
     val inited
-        get() = amInternal != null &&
-                imInternal != null &&
-                pmInternal != null &&
-                uaInternal != null &&
-                uaInternal!!.connected
+    get() = amInternal != null &&
+            imInternal != null &&
+            pmInternal != null &&
+            uaInternal != null &&
+            uaInternal!!.connected
 
     fun init() {
         if (inited) {
@@ -70,6 +75,13 @@ object Droid {
             PmsDelegate.FETCHER.fetch()
         } catch (e: DroidDelegate.UnableToFetchException) {
             throw UnableToInitException("Unable to connect to package manager; "
+                    + "is the system running?")
+        }
+
+        wmInternal = try {
+            WmsDelegate.FETCHER.fetch()
+        } catch (e: DroidDelegate.UnableToFetchException) {
+            throw UnableToInitException("Unable to connect to window manager; "
                     + "is the system running?")
         }
 

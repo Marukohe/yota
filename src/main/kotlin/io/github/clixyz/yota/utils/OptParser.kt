@@ -92,13 +92,22 @@ class OptParser(val args: Array<String>) {
         var arg = args[nextArg]
         if (arg.startsWith("-")) { // next option
             return null
-        } else if (arg.startsWith("\"") && arg.endsWith("\"")) { // wrapped with ""
-            arg = arg.substring(1, arg.length - 1)
-        } else if (arg.startsWith("'") && arg.endsWith("'")) { // wrapped with ''
-            arg = arg.substring(1, arg.length - 1)
+        } else if (arg.startsWith("'")) { // next args wrapped by ''
+            arg = nextOptionDataWithQuotes("'")
+        } else if (arg.startsWith("\"")) { // next args wrapped by ""
+            arg = nextOptionDataWithQuotes("\"")
         }
         nextArg++
         return arg
+    }
+
+    private fun nextOptionDataWithQuotes(q: String): String {
+        val start = nextArg
+        while (!args[nextArg].endsWith(q)) {
+            nextArg++
+        }
+        val arg = args.slice(start..nextArg).joinToString(" ")
+        return arg.substring(1, arg.length - 1)
     }
 }
 
@@ -118,6 +127,13 @@ fun main(args: Array<String>) {
     println()
 
     parse = OptParser("-x \"208.95996\" -y \"1133.9062\"".split(" "))
+    for (opt in parse) {
+        println("$opt => ${parse.get(opt)}")
+    }
+
+    println()
+
+    parse = OptParser("--desc \"Advanced Oppos Operations\" -y \"1133.9062\"".split(" "))
     for (opt in parse) {
         println("$opt => ${parse.get(opt)}")
     }

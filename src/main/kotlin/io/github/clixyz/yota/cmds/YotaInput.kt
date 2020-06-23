@@ -247,6 +247,7 @@ class YotaInput : Command {
                     "--desc-contains" -> selector.descContains(parser.get(opt))
                     "--res-id" -> selector.res(parser.get(opt))
                     "--res-id-matches" -> selector.res(Pattern.compile(parser.get(opt)!!))
+                    "--res-id-contains" -> selector.resContains(parser.get(opt))
                     "--clickable" -> selector.clickable(true)
                     "--long-clickable" -> selector.longClickable(true)
                     "--checkable" -> selector.checkable(true)

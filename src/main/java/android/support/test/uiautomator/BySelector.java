@@ -290,6 +290,20 @@ public class BySelector {
 
     /**
      * Sets the resource name criteria for matching. A UI element will be considered a match if its
+     * resource package and resource id exactly match the {@code resourcePackage} and
+     * {@code resourceId} parameters and all other criteria for this selector are met.
+     *
+     * @param substring The substring to match.
+     * @return A reference to this {@link BySelector}.
+     */
+    public BySelector resContains(String substring) {
+        checkNotNull(substring, "substring cannot be null");
+
+        return res(Pattern.compile(String.format("^.*%s.*$", Pattern.quote(substring))));
+    }
+
+    /**
+     * Sets the resource name criteria for matching. A UI element will be considered a match if its
      * resource name matches the {@code resourceName} {@link Pattern} and all other criteria for
      * this selector are met.
      *
