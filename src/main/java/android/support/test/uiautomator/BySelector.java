@@ -181,6 +181,21 @@ public class BySelector {
 
     /**
      * Sets the content description criteria for matching. A UI element will be considered a match
+     * if its content description contains the {@code substring} parameter and all other criteria
+     * for this selector are met (cases are ignored).
+     *
+     * @param substring The substring to match.
+     * @return A reference to this {@link BySelector}.
+     */
+    public BySelector descContainsIgnoreCase(String substring) {
+        checkNotNull(substring, "substring cannot be null");
+
+        return desc(Pattern.compile(
+                String.format("^.*%s.*$", Pattern.quote(substring)), Pattern.CASE_INSENSITIVE));
+    }
+
+    /**
+     * Sets the content description criteria for matching. A UI element will be considered a match
      * if its content description starts with the {@code substring} parameter and all other criteria
      * for this selector are met.
      *
@@ -304,6 +319,22 @@ public class BySelector {
 
     /**
      * Sets the resource name criteria for matching. A UI element will be considered a match if its
+     * resource package and resource id exactly match the {@code resourcePackage} and
+     * {@code resourceId} parameters and all other criteria for this selector are met (cases are
+     * ignored).
+     *
+     * @param substring The substring to match.
+     * @return A reference to this {@link BySelector}.
+     */
+    public BySelector resContainsIgnoreCase(String substring) {
+        checkNotNull(substring, "substring cannot be null");
+
+        return res(Pattern.compile(
+                String.format("^.*%s.*$", Pattern.quote(substring)), Pattern.CASE_INSENSITIVE));
+    }
+
+    /**
+     * Sets the resource name criteria for matching. A UI element will be considered a match if its
      * resource name matches the {@code resourceName} {@link Pattern} and all other criteria for
      * this selector are met.
      *
@@ -346,6 +377,21 @@ public class BySelector {
         checkNotNull(substring, "substring cannot be null");
 
         return text(Pattern.compile(String.format("^.*%s.*$", Pattern.quote(substring))));
+    }
+
+    /**
+     * Sets the text value criteria for matching. A UI element will be considered a match if its
+     * text value contains the {@code substring} parameter and all other criteria for this selector
+     * are met (cases are ignored).
+     *
+     * @param substring The substring to match.
+     * @return A reference to this {@link BySelector}.
+     */
+    public BySelector textContainsIgnoreCase(String substring) {
+        checkNotNull(substring, "substring cannot be null");
+
+        return text(Pattern.compile(
+                String.format("^.*%s.*$", Pattern.quote(substring)), Pattern.CASE_INSENSITIVE));
     }
 
     /**

@@ -20,11 +20,14 @@ class YotaSelect : Command {
         "              [--idx <index>]\n" +
         "              [--cls <cls>] [--cls-matches <regexp>]\n" +
         "              [--pkg <pkg>] [--pkg-matches <regexp>]\n" +
-        "              [--txt <text>] [--txt-matches <regexp>] [--txt-contains <str>]\n" +
+        "              [--txt <text>] [--txt-matches <regexp>]\n" +
+        "              [--txt-contains <str>] [--txt-contains-ignore-case <str>]\n" +
         "              [--txt-starts-with <str>] [--txt-ends-with <str>]\n" +
-        "              [--desc <desc>] [--desc-matches <regexp>] [--desc-contains <str>]\n" +
+        "              [--desc <desc>] [--desc-matches <regexp>]\n" +
+        "              [--desc-contains <str>] [--desc-contains-ignore-case <str>]\n" +
         "              [--desc-starts-with <str>] [--desc-ends-with <str>]\n" +
         "              [--res-id <id>] [--res-id-matches <regexp>]\n" +
+        "              [--res-id-contains <str>] [--res-id-contains-ignore-case <str>]\n" +
         "              [--clickable] [--long-clickable]\n" +
         "              [--checkable] [--checked]\n" +
         "              [--focusable] [--focused]\n" +
@@ -55,14 +58,17 @@ class YotaSelect : Command {
                 "--txt-starts-with" -> selector.textStartsWith(parser.get(opt))
                 "--txt-ends-with" -> selector.textEndsWith(parser.get(opt))
                 "--txt-contains" -> selector.textContains(parser.get(opt))
+                "--txt-contains-ignore-case" -> selector.textContainsIgnoreCase(parser.get(opt))
                 "--desc" -> selector.desc(parser.get(opt))
                 "--desc-matches" -> selector.desc(Pattern.compile(parser.get(opt)!!))
                 "--desc-starts-with" -> selector.descStartsWith(parser.get(opt))
                 "--desc-ends-with" -> selector.descEndsWith(parser.get(opt))
                 "--desc-contains" -> selector.descContains(parser.get(opt))
+                "--desc-contains-ignore-case" -> selector.descContainsIgnoreCase(parser.get(opt))
                 "--res-id" -> selector.res(parser.get(opt))
                 "--res-id-matches" -> selector.res(Pattern.compile(parser.get(opt)!!))
                 "--res-id-contains" -> selector.resContains(parser.get(opt))
+                "--res-id-contains-ignore-case" -> selector.resContainsIgnoreCase(parser.get(opt))
                 "--clickable" -> selector.clickable(true)
                 "--long-clickable" -> selector.longClickable(true)
                 "--checkable" -> selector.checkable(true)
