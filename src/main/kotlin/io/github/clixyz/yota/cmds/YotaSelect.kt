@@ -2,6 +2,7 @@ package io.github.clixyz.yota.cmds
 
 import android.support.test.uiautomator.By
 import io.github.clixyz.yota.droid.Droid
+import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
 import io.github.clixyz.yota.utils.Command
 import io.github.clixyz.yota.utils.Logger
 import io.github.clixyz.yota.utils.OptParser
@@ -16,7 +17,7 @@ class YotaSelect : Command {
         "select: select views by attributes\n" +
         "\n" +
         "usage: \n" +
-        "  yota select [--n <n>]\n" +
+        "  yota select [-n <n>]\n" +
         "              [--idx <index>]\n" +
         "              [--cls <cls>] [--cls-matches <regexp>]\n" +
         "              [--pkg <pkg>] [--pkg-matches <regexp>]\n" +
@@ -39,6 +40,9 @@ class YotaSelect : Command {
     companion object {
         val SUCCEEDED = Command.Status(0, "succeeded")
         val FAILED_INSUFFICIENT_ARGS = Command.Status(1, "args are insufficient")
+        val FAILED_NULL_ROOT = Command.Status(2, "root is null at present")
+        @Suppress("FunctionName")
+        fun FAILED_UNKNOWN_OPTION(opt: String) = Command.Status(3, "option $opt is unknown")
     }
 
     override fun exec(args: Array<String>): Command.Status {
@@ -78,13 +82,18 @@ class YotaSelect : Command {
                 "--scrollable" -> selector.scrollable(true)
                 "--enabled" -> selector.enabled(true)
                 "--selected" -> selector.selected(true)
+                else -> return FAILED_UNKNOWN_OPTION(opt)
             }
         }
         if (n == null) {
             Logger.e("No count specified, use -n to specify which one to select (when negative, select all)")
             return FAILED_INSUFFICIENT_ARGS
         }
-        val found = Droid.exec { it.ua.findViews(selector) }
+        val found = try {
+            Droid.exec { it.ua.findViews(selector) }
+        } catch (x: UiAutoDelegate.NullRootException) {
+            return FAILED_NULL_ROOT
+        }
         if (found.isEmpty()) {
             Logger.println("[]")
             return SUCCEEDED
