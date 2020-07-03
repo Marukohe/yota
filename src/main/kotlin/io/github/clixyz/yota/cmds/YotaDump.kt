@@ -19,7 +19,7 @@ class YotaDump : Command, YotaServer.Handle {
         "  yota dump\n" +
         "    [-c|--compressed]\n" +
         "    [-m|--meta KVs]\n" +
-        "    -o|--output <OUTPUT_FILE> \n" +
+        "    -o|--output <OUTPUT_FILE|stdout|stderr> \n" +
         "\n" +
         "notes:\n" +
         "  KVs  comma separated key=value pairs, e.g., key1=value1,key2=value2\n" +
@@ -95,7 +95,17 @@ class YotaDump : Command, YotaServer.Handle {
         return try {
             Droid.exec {
                 it.ua.compressed = compressed
-                it.ua.dump(output, meta)
+                when (output) {
+                    "stdout" -> {
+                        it.ua.dump(System.out, meta)
+                    }
+                    "stderr" -> {
+                        it.ua.dump(System.err, meta)
+                    }
+                    else -> {
+                        it.ua.dump(output, meta)
+                    }
+                }
             }
             SUCCEEDED
         } catch (e: UiAutoDelegate.NullRootException) {

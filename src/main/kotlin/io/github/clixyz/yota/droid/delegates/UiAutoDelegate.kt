@@ -123,6 +123,20 @@ object UiAutoDelegate {
         }
     }
 
+    @Throws(
+        HasNotConnectedException::class,
+        NullRootException::class,
+        IOException::class
+    )
+    fun dump(ps: PrintStream, extra: Map<String, String>) {
+        mustConnected()
+        val root = ua.rootInActiveWindow ?: throw NullRootException()
+        with (ps) {
+            YotaViewDumper.dump(YotaView(root), this, extra)
+            close()
+        }
+    }
+
     @Throws(HasNotConnectedException::class)
     fun takeScreenshot(): Bitmap? {
         mustConnected()
