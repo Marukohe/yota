@@ -10,12 +10,15 @@ import android.support.test.uiautomator.BySelector
 import android.support.test.uiautomator.UiDevice
 import android.view.accessibility.AccessibilityNodeInfo
 import com.android.uiautomator.core.AccessibilityNodeInfoHelper
+import io.github.clixyz.yota.utils.accessors.nextInt
 import io.github.clixyz.yota.view.YotaView
 import io.github.clixyz.yota.view.YotaViewDumper
 import io.github.clixyz.yota.view.accessors.YotaViewFilter
 import io.github.clixyz.yota.view.accessors.YotaViewOrder
 import io.github.clixyz.yota.view.accessors.accept
+import org.json.simple.JSONObject
 import java.io.*
+import java.util.*
 
 object UiAutoDelegate {
 
@@ -105,8 +108,8 @@ object UiAutoDelegate {
         NullRootException::class,
         IOException::class
     )
-    fun dump(path: String) {
-        dump(path, mapOf())
+    fun dump(path: String, extra: Map<String, String> = mapOf(), bg: Boolean = false) {
+        dump(PrintStream(FileOutputStream(path)), extra, bg)
     }
 
     @Throws(
@@ -114,25 +117,19 @@ object UiAutoDelegate {
         NullRootException::class,
         IOException::class
     )
-    fun dump(path: String, extra: Map<String, String>) {
+    fun dump(out: PrintStream, extra: Map<String, String> = mapOf(), bg: Boolean = false) {
         mustConnected()
-        val root = ua.rootInActiveWindow ?: throw NullRootException()
-        with (PrintStream(FileOutputStream(path))) {
-            YotaViewDumper.dump(YotaView(root), this, extra)
-            close()
+        val root = rootView ?: throw NullRootException()
+        val bm = takeScreenshot() ?: throw NullRootException()
+        val rm = YotaViewDumper.hierarchyToMap(root)
+        if (bg) {
+            addBackground(rm, bm)
         }
-    }
-
-    @Throws(
-        HasNotConnectedException::class,
-        NullRootException::class,
-        IOException::class
-    )
-    fun dump(ps: PrintStream, extra: Map<String, String>) {
-        mustConnected()
-        val root = ua.rootInActiveWindow ?: throw NullRootException()
-        with (ps) {
-            YotaViewDumper.dump(YotaView(root), this, extra)
+        with (out) {
+            print(JSONObject(mapOf(
+                "extra" to extra,
+                "hierarchy" to rm
+            )).toJSONString())
             close()
         }
     }
@@ -184,6 +181,69 @@ object UiAutoDelegate {
         }
 
         return SYSTEM_DIALOG_NORMAL
+    }
+
+    @Suppress("MapGetWithNotNullAssertionOperator", "UNCHECKED_CAST")
+    private fun addBackground(rm: Map<String, Any>, bm: Bitmap) {
+        val q = LinkedList<Map<String, Any>>()
+        q.push(rm)
+        while (!q.isEmpty()) {
+            val m = q.poll() as MutableMap<String, Any>
+            val bd = m["bounds"] as Map<String, Int>
+            val l = bd["left"]!!
+            val r = bd["right"]!!
+            val t = bd["top"]!!
+            val b = bd["bottom"]!!
+            val w = r - l
+            val h = b - t
+
+            // select sample area
+            // +-+---------+-+ <- t
+            // | |    1    | |
+            // +-+---------+-+ <- t+h*10%
+            // | |         | |
+            // |2|         |3|
+            // | |         | |
+            // +-+---------+-+ <- b-h*10%
+            // | |    4    | |
+            // +-+---------+-+ <- b
+            // v |         | v
+            // l v         v r
+            //   l+w*10%   r-w*10%
+            val p = 0.05
+            val box = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
+            box.add((l to r) to (t to (t+(h*p).toInt()))) // 1
+            box.add((l to (l+(w*p).toInt())) to (t to b)) // 2
+            box.add(((r-(w*p).toInt()) to r) to (t to b)) // 3
+            box.add((l to r) to ((b-(h*p).toInt()) to b)) // 4
+
+            // sample 10 pixels in each area
+            val pm = mutableMapOf<Int, Int>() // px -> votes
+            val rd = Random(0)
+            for (a in box) {
+                val xs = a.first
+                val ys = a.second
+                val x = rd.nextInt(xs.first, xs.second)
+                val y = rd.nextInt(ys.first, ys.second)
+                val px = bm.getPixel(x, y)
+                pm[px] = pm.getOrDefault(px, 1) + 1
+            }
+
+            // elect the pixel with most votes
+            var max = -1
+            var maxPx = -1
+            for (e in pm.entries) {
+                if (e.value > max) {
+                    max = e.value
+                    maxPx = e.key
+                }
+            }
+            m["background"] = maxPx
+
+            for (c in (m["children"] as List<Map<String, Any>>)) {
+                q.push(c)
+            }
+        }
     }
 
     @Throws(HasNotConnectedException::class)

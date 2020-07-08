@@ -1,8 +1,6 @@
 package io.github.clixyz.yota.view
 
 import android.graphics.Rect
-import org.json.simple.JSONObject
-import java.io.PrintStream
 
 object YotaViewDumper {
 
@@ -36,15 +34,6 @@ object YotaViewDumper {
         val viewMap = viewToMap(view) as MutableMap<String, Any>
         viewMap["children"] = children
         return viewMap
-    }
-
-    fun dump(view: YotaView,
-             out: PrintStream = System.out,
-             extra: Map<String, String> = mapOf()) {
-        out.print(JSONObject(mapOf(
-            "extra" to extra,
-            "hierarchy" to hierarchyToMap(view)
-        )).toJSONString())
     }
 
     private fun viewBoundsToMap(bounds: Rect?): Map<String, Int> {

@@ -18,6 +18,7 @@ class YotaDump : Command, YotaServer.Handle {
         "usage:\n" +
         "  yota dump\n" +
         "    [-c|--compressed]\n" +
+        "    [-b|--background]\n" +
         "    [-m|--meta KVs]\n" +
         "    -o|--output <OUTPUT_FILE|stdout|stderr> \n" +
         "\n" +
@@ -31,12 +32,12 @@ class YotaDump : Command, YotaServer.Handle {
         val FAILED_INSUFFICIENT_ARGS = Command.Status(1, "args are insufficient")
         val FAILED_ROOT_IS_NULL = Command.Status(2, "failed to get system window: is null")
         val FAILED_IO_EXCEPTION = Command.Status(3, "io exception happened")
-        val FAILED_EXCEPTION = Command.Status(4, "exception happened")
     }
 
     override fun exec(args: Array<String>): Command.Status {
         val parser = OptParser(args)
         var compressed = false
+        var background = false
         var output = ""
         val meta = mutableMapOf<String, String>()
 
@@ -54,6 +55,8 @@ class YotaDump : Command, YotaServer.Handle {
                 }
             } else if (opt == "--compressed" || opt == "-c") {
                 compressed = true
+            } else if (opt == "--background" || opt == "-b") {
+                background = true
             } else if (opt == "--output" || opt == "-o") {
                 val path = parser.get(opt)
                 output = if (path == null || path.isEmpty()) {
@@ -69,12 +72,13 @@ class YotaDump : Command, YotaServer.Handle {
             return FAILED_INSUFFICIENT_ARGS
         }
 
-        return doDump(compressed, meta, output)
+        return doDump(compressed, background, meta, output)
     }
 
     override fun handle(data: JSONObject): YotaServer.Handle.Result {
         // data: {"compressed": true, "meta": {"key": "value"}, "output": "/data/local/tmp/a.xml"}
-        val compressed = data.getOrDefaultTyped("compressed", true)
+        val compressed = data.getOrDefaultTyped("compressed", false)
+        val background = data.getOrDefaultTyped("background", false)
         val meta = mutableMapOf<String, String>().apply {
             val obj = data.getOrDefaultTyped("meta", JSONObject())
             for ((key, value) in obj) {
@@ -86,24 +90,24 @@ class YotaDump : Command, YotaServer.Handle {
         return if (output.isEmpty()) {
             YotaServer.Handle.Result(Status.OK, FAILED_INSUFFICIENT_ARGS.code, FAILED_INSUFFICIENT_ARGS.msg)
         } else {
-            val status = doDump(compressed, meta, output)
+            val status = doDump(compressed, background, meta, output)
             YotaServer.Handle.Result(Status.OK, status.code, status.msg)
         }
     }
 
-    private fun doDump(compressed: Boolean, meta: Map<String, String>, output: String): Command.Status {
+    private fun doDump(compressed: Boolean, background: Boolean, meta: Map<String, String>, output: String): Command.Status {
         return try {
             Droid.exec {
                 it.ua.compressed = compressed
                 when (output) {
                     "stdout" -> {
-                        it.ua.dump(System.out, meta)
+                        it.ua.dump(System.out, meta, background)
                     }
                     "stderr" -> {
-                        it.ua.dump(System.err, meta)
+                        it.ua.dump(System.err, meta, background)
                     }
                     else -> {
-                        it.ua.dump(output, meta)
+                        it.ua.dump(output, meta, background)
                     }
                 }
             }
@@ -114,12 +118,6 @@ class YotaDump : Command, YotaServer.Handle {
         } catch (e: IOException) {
             Logger.e("IO exception")
             FAILED_IO_EXCEPTION
-        } catch (t: Throwable) {
-            if (t.message == null) {
-                FAILED_EXCEPTION
-            } else {
-                FAILED_EXCEPTION.copy(msg=t.message!!)
-            }
         }
     }
 }
