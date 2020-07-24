@@ -96,10 +96,10 @@ object UiAutoDelegate {
         mustConnected()
         val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
         val nodes = ByMatcher.findMatches(UiDevice.getInstance(), selector, root)
-        if (nodes.isEmpty()) {
-            return arrayListOf()
+        return if (nodes.isEmpty()) {
+            arrayListOf()
         } else {
-            return nodes.map { n -> YotaView(n) }
+            nodes.map { n -> YotaView(n) }
         }
     }
 

@@ -148,7 +148,7 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         return node!!.isVisibleToUser
     }
 
-    val importantForA11n: Boolean
+    val importantForA11y: Boolean
     get() {
         cannotRecycled()
         return node!!.isImportantForAccessibility

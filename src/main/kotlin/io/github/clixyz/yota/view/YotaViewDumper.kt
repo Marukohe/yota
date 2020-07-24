@@ -25,6 +25,7 @@ object YotaViewDumper {
             put("selected", view.selected)
             put("password", view.password)
             put("enabled", view.enabled)
+            put("important", view.importantForA11y)
             put("bounds", viewBoundsToMap(view.bounds))
         }
     }

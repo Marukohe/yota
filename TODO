@@ -2,3 +2,4 @@
    1. reflection and,
    2. ActivityManager, PackageManager, InputManager instead of IActivityManager, ...
 2. Add more commands
+3. Detect ANR using dumpsys window (dumpsys window lastanr)
