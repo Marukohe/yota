@@ -356,7 +356,7 @@ class YotaMnky(val stateDir: String) : Command {
                 }
             }
             is YotaTapEvent -> builder.append(":tap: (${event.x}, ${event.y})")
-            is YotaSwipeEvent -> builder.append(":swipe: (${event.fromX}, ${event.fromY}), ${event.steps}, (${event.toX}, ${event.toY})")
+            is YotaSwipeEvent -> builder.append(":swipe: (${event.fromX}, ${event.fromY}), ${event.duration}, (${event.toX}, ${event.toY})")
             is YotaTextEvent -> builder.append(":text: ${event.text}")
             is YotaKeyEvent -> builder.append(":key: ${KeyEvent.keyCodeToString(event.key)}")
             is YotaStartActivityEvent -> builder.append(":start-activity: ${event.cn.packageName}/${event.cn.className}")

@@ -7,10 +7,10 @@ open class YotaSwipeViewEvent(
     selector: BySelector,
     val dx: Float,
     val dy: Float,
-    val steps: Int
+    val duration: Long
 ) : YotaViewEvent(selector) {
 
-    override fun injectInner(view: YotaView): Int = if (view.swipe(dx, dy, steps)) {
+    override fun injectInner(view: YotaView): Int = if (view.swipe(dx, dy, duration)) {
         YotaEvent.INJECT_SUCCEEDED
     } else {
         YotaEvent.INJECT_FAILED

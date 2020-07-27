@@ -226,17 +226,17 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         }
     }
 
-    fun swipe(dX: Float, dY: Float, steps: Int): Boolean {
+    fun swipe(dX: Float, dY: Float, duration: Long): Boolean {
         cannotRecycled()
         val bounds = node!!.boundsInScreen ?: return false
         val fromX = bounds.centerX().toFloat()
         val fromY = bounds.centerY().toFloat()
         val toX = fromX + dX
         val toY = fromY + dY
-        return Droid.exec { it.im.swipe(fromX, fromY, toX, toY, steps) }
+        return Droid.exec { it.im.swipe(fromX, fromY, toX, toY, duration) }
     }
 
-    fun swipe(offX: Float, offY: Float, dX: Float, dY: Float, steps: Int): Boolean {
+    fun swipe(offX: Float, offY: Float, dX: Float, dY: Float, duration: Long): Boolean {
         cannotRecycled()
         val bounds = node!!.boundsInScreen ?: return false
         val fromX = bounds.left + offX
@@ -246,7 +246,7 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         return when {
             bounds.left < fromX || bounds.right > fromX -> false
             bounds.top < fromY || bounds.bottom > fromY -> false
-            else -> Droid.exec { it.im.swipe(fromX, fromY, toX, toY, steps) }
+            else -> Droid.exec { it.im.swipe(fromX, fromY, toX, toY, duration) }
         }
     }
 

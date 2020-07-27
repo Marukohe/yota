@@ -23,7 +23,7 @@ class YotaInput : Command {
         "                   --from-y <from-y> \n" +
         "                   --to-x <to-x> \n" +
         "                   --to-y <to-y> \n" +
-        "                   --steps <steps>\n" +
+        "                   --duration <ms>\n" +
         "  yota input key <key>\n" +
         "  yota input text <text>\n" +
         "  yota input view --type <tap|longtap>\n" +
@@ -163,7 +163,7 @@ class YotaInput : Command {
         var fromY: Float? = null
         var toX: Float? = null
         var toY: Float? = null
-        var steps: Int? = null
+        var duration: Long? = null
 
         for (opt in parser) {
             when (opt) {
@@ -171,7 +171,7 @@ class YotaInput : Command {
                 "--from-y" -> fromY = parser.getTyped(opt, java.lang.Float::parseFloat)
                 "--to-x" -> toX = parser.getTyped(opt, java.lang.Float::parseFloat)
                 "--to-y" -> toY = parser.getTyped(opt, java.lang.Float::parseFloat)
-                "--steps" -> steps = parser.getTyped(opt, Integer::parseInt)
+                "--duration" -> duration = parser.getTyped(opt, java.lang.Long::parseLong)
             }
         }
 
@@ -196,12 +196,12 @@ class YotaInput : Command {
                 null
             }
 
-            steps == null -> {
-                Logger.e("--steps is not provided, use --steps to provide a steps")
+            duration == null -> {
+                Logger.e("--duration is not provided, use --duration to provide a duration")
                 null
             }
 
-            else -> YotaSwipeEvent(fromX, fromY, toX, toY, steps)
+            else -> YotaSwipeEvent(fromX, fromY, toX, toY, duration)
         }
     }
 
@@ -229,7 +229,7 @@ class YotaInput : Command {
         var type: String? = null
         var dx: Float? = null
         var dy: Float? = null
-        var steps: Int? = null
+        var duration: Long? = null
         try {
             for (opt in parser) {
                 when (opt) {
@@ -266,7 +266,7 @@ class YotaInput : Command {
                     "--selected" -> selector.selected(true)
                     "--dx" -> dx = java.lang.Float.parseFloat(parser.get(opt))
                     "--dy" -> dy = java.lang.Float.parseFloat(parser.get(opt))
-                    "--steps" -> steps = Integer.parseInt(parser.get(opt))
+                    "--duration" -> duration = java.lang.Long.parseLong(parser.get(opt))
                 }
             }
             if (type == null) {
@@ -277,11 +277,11 @@ class YotaInput : Command {
                 "tap" -> YotaTapViewEvent(selector)
                 "longtap" -> YotaLongTapViewEvent(selector)
                 "swipe" -> {
-                    if (dx == null || dy == null || steps == null) {
-                        Logger.e("No dx, dy, or steps specified for swipe, use --dx, --dy, --steps to specify them")
+                    if (dx == null || dy == null || duration == null) {
+                        Logger.e("No dx, dy, or duration specified for swipe, use --dx, --dy, --duration to specify them")
                         return null
                     }
-                    YotaSwipeViewEvent(selector, dx, dy, steps)
+                    YotaSwipeViewEvent(selector, dx, dy, duration)
                 }
                 else -> {
                     Logger.e("No such view event type $type")

@@ -75,30 +75,23 @@ class ImsDelegate(private val im: IInputManager)
 
     // swipe
 
-    fun swipe(fromX: Float, fromY: Float, toX: Float, toY: Float, steps: Int): Boolean {
+    fun swipe(fromX: Float, fromY: Float, toX: Float, toY: Float, durationMillis: Long = 300L): Boolean {
         var ret: Boolean
 
+        val duration = if (durationMillis < 0) 300 else durationMillis
         val downAt = SystemClock.uptimeMillis()
-        val swipeSteps = if (steps != 0) steps else 1
-        val xStep = (toX - fromX) / swipeSteps
-        val yStep = (toY - fromY) / swipeSteps
-
-        // first tap starts exactly at the point requested
         ret = tapDown(fromX, fromY, downAt)
-        for (i in 1 until swipeSteps) {
-            ret = ret && tapMove(fromX + (xStep * i), fromY + (yStep * i),
-                    downAt, SystemClock.uptimeMillis())
-            if (!ret) {
-                break
-            }
-            // set some known constant delay between steps as without it this
-            // become completely dependent on the speed of the system and results
-            // may vary on different devices. This guarantees at minimum we have
-            // a preset delay.
-            SystemClock.sleep(5)
+        var now = downAt
+        val startTime = now
+        val endTime = startTime + duration
+        while (now < endTime) {
+            val elapsedTime = now - startTime
+            val alpha = elapsedTime.toFloat() / duration
+            ret = ret && tapMove(lerp(fromX, toX, alpha), lerp(fromY, toY, alpha), downAt, now)
+            now = SystemClock.uptimeMillis()
         }
 
-        return ret && tapUp(toX, toY, downAt, SystemClock.uptimeMillis())
+        return ret && tapUp(toX, toY, downAt, now)
     }
 
     // key
@@ -146,6 +139,10 @@ class ImsDelegate(private val im: IInputManager)
             }
         }
         return true
+    }
+
+    private fun lerp(a: Float, b: Float, alpha: Float): Float {
+        return (b - a) * alpha + a
     }
 
     private fun injectInputEventWaitForFinish(event: InputEvent): Boolean {

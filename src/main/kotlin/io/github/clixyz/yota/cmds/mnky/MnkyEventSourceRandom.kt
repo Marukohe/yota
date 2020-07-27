@@ -205,6 +205,7 @@ class MnkyEventSourceRandom(
 
         val fromX = rect.left + random.nextInt(w)
         val fromY = rect.top + random.nextInt(h)
+        val duration = random.nextInt(1000).toLong()
         val stepX = if (random.nextDouble() > 0.5) random.nextInt(w) else -random.nextInt(w)
         val stepY = if (random.nextDouble() > 0.5) random.nextInt(h) else -random.nextInt(h)
         var toX = fromX + stepX
@@ -219,10 +220,9 @@ class MnkyEventSourceRandom(
         } else if (toY > rect.bottom) {
             toY = rect.bottom
         }
-        val steps = random.nextInt(10)
 
         return YotaViewCompoundEvent(v, YotaSwipeEvent(
-                fromX.toFloat(), fromY.toFloat(), toX.toFloat(), toY.toFloat(), steps))
+                fromX.toFloat(), fromY.toFloat(), toX.toFloat(), toY.toFloat(), duration))
     }
 
     private fun textEvent(views: List<YotaView>): YotaViewCompoundEvent {
