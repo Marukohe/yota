@@ -48,9 +48,11 @@ class YotaSelect : Command {
     override fun exec(args: Array<String>): Command.Status {
         val parser = OptParser(args)
         val selector = By.newSelector()
+        var compressed = false
         var n: Int? = 1
         for (opt in parser) {
             when (opt) {
+                "--compressed" -> compressed = true
                 "-n" -> n = parser.getTyped(opt, Integer::parseInt) // select all views that matches, else select the very first
                 "--idx" -> selector.index(Integer.parseInt(parser.get(opt)))
                 "--cls" -> selector.clazz(parser.get(opt))
@@ -90,7 +92,10 @@ class YotaSelect : Command {
             return FAILED_INSUFFICIENT_ARGS
         }
         val found = try {
-            Droid.exec { it.ua.findViews(selector) }
+            Droid.exec {
+                it.ua.compressed = compressed
+                it.ua.findViews(selector)
+            }
         } catch (x: UiAutoDelegate.NullRootException) {
             return FAILED_NULL_ROOT
         }
