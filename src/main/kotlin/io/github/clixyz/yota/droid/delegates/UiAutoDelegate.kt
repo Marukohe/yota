@@ -223,8 +223,30 @@ object UiAutoDelegate {
             for (a in box) {
                 val xs = a.first
                 val ys = a.second
-                val x = rd.nextInt(xs.first, xs.second)
-                val y = rd.nextInt(ys.first, ys.second)
+                var x = if (xs.first == xs.second) xs.first else rd.nextInt(xs.first, xs.second)
+                var y = if (ys.first == ys.second) ys.first else rd.nextInt(ys.first, ys.second)
+                x = when {
+                    x <= 0 -> {
+                        1
+                    }
+                    x >= bm.width -> {
+                        bm.width - 1
+                    }
+                    else -> {
+                        x
+                    }
+                }
+                y = when {
+                    y <= 0 -> {
+                        1
+                    }
+                    y >= bm.height -> {
+                        bm.height - 1
+                    }
+                    else -> {
+                        y
+                    }
+                }
                 val px = bm.getPixel(x, y)
                 pm[px] = pm.getOrDefault(px, 1) + 1
             }
