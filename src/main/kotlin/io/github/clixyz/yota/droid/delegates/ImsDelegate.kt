@@ -31,7 +31,6 @@ class ImsDelegate(private val im: IInputManager)
     // tap
 
     fun tap(x: Float, y: Float): Boolean {
-        ViewConfiguration.getLongPressTimeout()
         val downAt = SystemClock.uptimeMillis()
         if (tapDown(x, y, downAt)) {
             val upAt = SystemClock.uptimeMillis()
@@ -41,24 +40,15 @@ class ImsDelegate(private val im: IInputManager)
     }
 
     fun tapDown(x: Float, y: Float, downAt: Long): Boolean {
-        val event = MotionEvent.obtain(downAt, downAt,
-                MotionEvent.ACTION_DOWN, x, y, 1)
-        event.source = InputDevice.SOURCE_TOUCHSCREEN
-        return injectInputEventWaitForFinish(event)
+        return injectMotionEvent(MotionEvent.ACTION_DOWN, downAt, downAt, x, y, 1.0f)
     }
 
     fun tapUp(x: Float, y: Float, downAt: Long, upAt: Long): Boolean {
-        val event = MotionEvent.obtain(downAt, upAt,
-                MotionEvent.ACTION_UP, x, y, 1)
-        event.source = InputDevice.SOURCE_TOUCHSCREEN
-        return injectInputEventWaitForFinish(event)
+        return injectMotionEvent(MotionEvent.ACTION_UP, upAt, downAt, x, y, 0.0f)
     }
 
     fun tapMove(x: Float, y: Float, downAt: Long, moveAt: Long): Boolean {
-        val event = MotionEvent.obtain(downAt, moveAt,
-                MotionEvent.ACTION_MOVE, x, y, 1)
-        event.source = InputDevice.SOURCE_TOUCHSCREEN
-        return injectInputEventWaitForFinish(event)
+        return injectMotionEvent(MotionEvent.ACTION_MOVE, moveAt, downAt, x, y, 1.0f)
     }
 
     // long tap
@@ -145,11 +135,38 @@ class ImsDelegate(private val im: IInputManager)
         return (b - a) * alpha + a
     }
 
+    private fun injectMotionEvent(action: Int, eventTime: Long, downAt: Long, x: Float, y: Float, pressure: Float): Boolean {
+        val DEFAULT_SIZE = 1.0f;
+        val DEFAULT_META_STATE = 0;
+        val DEFAULT_PRECISION_X = 1.0f;
+        val DEFAULT_PRECISION_Y = 1.0f;
+        val DEFAULT_EDGE_FLAGS = 0;
+        val DEFAULT_DEVICE = InputDevice.SOURCE_TOUCHSCREEN
+        val event = MotionEvent.obtain(downAt, eventTime, action, x, y, pressure,
+                DEFAULT_SIZE, DEFAULT_META_STATE,
+                DEFAULT_PRECISION_X, DEFAULT_PRECISION_Y,
+                getInputDeviceId(DEFAULT_DEVICE), DEFAULT_EDGE_FLAGS)
+        event.source = DEFAULT_DEVICE
+        return injectInputEventWaitForFinish(event)
+    }
+
     private fun injectInputEventWaitForFinish(event: InputEvent): Boolean {
         return try {
             im.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
         } finally {
             event.recycle()
         }
+    }
+
+    private fun getInputDeviceId(inputSource: Int): Int {
+        val DEFAULT_DEVICE_ID = 0
+        val devIds = InputDevice.getDeviceIds()
+        for (devId in devIds) {
+            val inputDev = InputDevice.getDevice(devId)
+            if (inputDev.supportsSource(inputSource)) {
+                return devId
+            }
+        }
+        return DEFAULT_DEVICE_ID
     }
 }
