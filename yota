@@ -1,3 +1,11 @@
 #! /bin/bash
 
-adb shell /data/local/tmp/yota $*
+if [ "$YOTA_DEBUG" = "true" ]; then
+  if [ "$YOTA_DEBUG_USE_OLD" = "true" ]; then
+    adb shell YOTA_DEBUG_USE_OLD=true YOTA_DEBUG=true /data/local/tmp/yota $*
+  else
+    adb shell YOTA_DEBUG=true /data/local/tmp/yota $*
+  fi
+else
+  adb shell /data/local/tmp/yota $*
+fi

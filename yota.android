@@ -2,6 +2,10 @@
 
 if [ "$1" = "serverd" ]
 then
+    if [ "$YOTA_DEBUG" = "true" ]; then
+        echo "Error: debug mode cannot be enabled in daemon mode"
+        exit 1
+    fi
     # for unknown reasons, nohup hangs adb shell,
     # use daemonize instead, however, this command
     # is not always existing in any devices
@@ -10,8 +14,17 @@ then
         /data/local/tmp/ \
         io.github.clixyz.yota.YotaKt server
 else
+    debug=""
+    if [ "$YOTA_DEBUG" = "true" ]; then
+        if [ "$YOTA_DEBUG_USE_OLD" = "true" ]; then
+            debug="-agentlib:jdwp=transport=dt_socket,suspend=y,server=y,address=5005"
+        else
+            debug="-XjdwpProvider:internal -XjdwpOptions:transport=dt_socket,suspend=y,server=y,address=5005"
+        fi
+    fi
     /system/bin/app_process \
         -cp /data/local/tmp/yota.jar \
+        $debug \
         /data/local/tmp/ \
         io.github.clixyz.yota.YotaKt $*
 fi
