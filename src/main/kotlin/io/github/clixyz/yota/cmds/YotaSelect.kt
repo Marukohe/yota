@@ -49,7 +49,7 @@ class YotaSelect : Command {
         val parser = OptParser(args)
         val selector = By.newSelector()
         var compressed = false
-        var n: Int? = 1
+        var n: Int? = null
         for (opt in parser) {
             when (opt) {
                 "--compressed" -> compressed = true
@@ -87,10 +87,6 @@ class YotaSelect : Command {
                 else -> return FAILED_UNKNOWN_OPTION(opt)
             }
         }
-        if (n == null) {
-            Logger.e("No count specified, use -n to specify which one to select (when negative, select all)")
-            return FAILED_INSUFFICIENT_ARGS
-        }
         val found = try {
             Droid.exec {
                 it.ua.compressed = compressed
@@ -104,7 +100,8 @@ class YotaSelect : Command {
             return SUCCEEDED
         }
         val selected = when {
-            n < 0 -> found
+            n == null -> found
+            n < 0 -> listOf(found[0])
             n >= found.size -> listOf(found.last())
             else -> listOf(found[n])
         }

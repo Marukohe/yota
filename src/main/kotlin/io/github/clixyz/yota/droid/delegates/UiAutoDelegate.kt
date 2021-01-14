@@ -185,60 +185,101 @@ object UiAutoDelegate {
 
     @Suppress("MapGetWithNotNullAssertionOperator", "UNCHECKED_CAST")
     private fun addBackground(rm: Map<String, Any>, bm: Bitmap) {
+        val defaultBackground = -1
+
         val q = LinkedList<Map<String, Any>>()
         q.push(rm)
         while (!q.isEmpty()) {
             val m = q.poll() as MutableMap<String, Any>
             val bd = m["bounds"] as Map<String, Int>
-            val l = bd["left"]!!
-            val r = bd["right"]!!
-            val t = bd["top"]!!
-            val b = bd["bottom"]!!
-            val w = r - l
-            val h = b - t
+            var l = bd["left"]!!
+            var r = bd["right"]!!
+            var t = bd["top"]!!
+            var b = bd["bottom"]!!
+            var w = r - l
+            var h = b - t
 
-            // select sample area
-            // +-+---------+-+ <- t
-            // | |    1    | |
-            // +-+---------+-+ <- t+h*10%
-            // | |         | |
-            // |2|         |3|
-            // | |         | |
-            // +-+---------+-+ <- b-h*10%
-            // | |    4    | |
-            // +-+---------+-+ <- b
-            // v |         | v
-            // l v         v r
-            //   l+w*10%   r-w*10%
-            val p = 0.05
-            val box = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
-            box.add((l to r) to (t to (t+(h*p).toInt()))) // 1
-            box.add((l to (l+(w*p).toInt())) to (t to b)) // 2
-            box.add(((r-(w*p).toInt()) to r) to (t to b)) // 3
-            box.add((l to r) to ((b-(h*p).toInt()) to b)) // 4
+            // FIX: sometimes the left-right, top-bottom is in reversed order
+            l = Math.min(l, r)
+            r = Math.max(l, r)
+            t = Math.min(t, b)
+            b = Math.max(t, b)
+            w = Math.abs(w)
+            h = Math.abs(h)
 
-            // sample 10 pixels in each area
-            val pm = mutableMapOf<Int, Int>() // px -> votes
-            val rd = Random(0)
-            for (a in box) {
-                val xs = a.first
-                val ys = a.second
-                val x = rd.nextInt(xs.first, xs.second)
-                val y = rd.nextInt(ys.first, ys.second)
-                val px = bm.getPixel(x, y)
-                pm[px] = pm.getOrDefault(px, 1) + 1
-            }
+            if (r <= 0 || b <= 0 || w == 0 || h == 0) {
+                // cannot happen, directly skip
+                m["background"] = defaultBackground
+            } else {
+                l = Math.max(0, l)
+                t = Math.max(0, t)
 
-            // elect the pixel with most votes
-            var max = -1
-            var maxPx = -1
-            for (e in pm.entries) {
-                if (e.value > max) {
-                    max = e.value
-                    maxPx = e.key
+                // select sample area
+                // +-+---------+-+ <- t
+                // | |    1    | |
+                // +-+---------+-+ <- t+h*10%
+                // | |         | |
+                // |2|         |3|
+                // | |         | |
+                // +-+---------+-+ <- b-h*10%
+                // | |    4    | |
+                // +-+---------+-+ <- b
+                // v |         | v
+                // l v         v r
+                //   l+w*10%   r-w*10%
+
+                val p = 0.05
+                val box = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
+                box.add((l to r) to (t to (t+(h*p).toInt()))) // 1
+                box.add((l to (l+(w*p).toInt())) to (t to b)) // 2
+                box.add(((r-(w*p).toInt()) to r) to (t to b)) // 3
+                box.add((l to r) to ((b-(h*p).toInt()) to b)) // 4
+
+                // sample 10 pixels in each area
+                val pm = mutableMapOf<Int, Int>() // px -> votes
+                val rd = Random(0)
+                for (a in box) {
+                    val xs = a.first
+                    val ys = a.second
+                    var x = if (xs.first == xs.second) xs.first else rd.nextInt(xs.first, xs.second)
+                    var y = if (ys.first == ys.second) ys.first else rd.nextInt(ys.first, ys.second)
+                    x = when {
+                        x <= 0 -> {
+                            1
+                        }
+                        x >= bm.width -> {
+                            bm.width - 1
+                        }
+                        else -> {
+                            x
+                        }
+                    }
+                    y = when {
+                        y <= 0 -> {
+                            1
+                        }
+                        y >= bm.height -> {
+                            bm.height - 1
+                        }
+                        else -> {
+                            y
+                        }
+                    }
+                    val px = bm.getPixel(x, y)
+                    pm[px] = pm.getOrDefault(px, 1) + 1
                 }
+
+                // elect the pixel with most votes
+                var max = -1
+                var maxPx = -1
+                for (e in pm.entries) {
+                    if (e.value > max) {
+                        max = e.value
+                        maxPx = e.key
+                    }
+                }
+                m["background"] = maxPx
             }
-            m["background"] = maxPx
 
             for (c in (m["children"] as List<Map<String, Any>>)) {
                 q.push(c)
