@@ -1,5 +1,22 @@
 # Yota: Yet anOther Testing toolkit for Android
 
+Yota is a toolkit for Android testing. It is equipped with the functionalities like 
+- querying UI elements;
+- dumping the UI hierarchy ;
+- inputting an event;
+- monky-like random testing;
+- etc.
+
+## Notice
+
+Yota is developed and tested on deviced with rootable adb (i.e., `adb root` works).
+
+## Install
+
+```
+$ ./install [<serial-no>]
+```
+
 ## Usage
 
 ```
@@ -11,13 +28,6 @@ help: show help message
 
 usage:
   yota help [command]  show command help message
-
---
-server: start server at 6659 and accept commands
-
-usage: 
-  yota server   run server in foreground
-  yota serverd  run server as daemon
 
 --
 dump: dump ui hierarchy to an output file
