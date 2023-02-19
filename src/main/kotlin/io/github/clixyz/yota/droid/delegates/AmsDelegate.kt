@@ -33,7 +33,7 @@ class AmsDelegate(private val am: IActivityManager)
 
     val topActivity: ComponentName?
     get() = try {
-        val tasks = am.getTasks(2, 0)
+        val tasks = io.github.clixyz.yota.droid.getTasks(am, 2)
         if (tasks.size < 1) {
             null
         } else {
