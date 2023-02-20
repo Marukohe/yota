@@ -1,5 +1,6 @@
 package io.github.clixyz.yota.droid
 
+import edu.nju.ics.marukohe.metroid.Device
 import io.github.clixyz.yota.droid.delegates.*
 
 object Droid {

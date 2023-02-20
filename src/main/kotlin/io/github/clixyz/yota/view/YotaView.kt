@@ -1,27 +1,33 @@
 package io.github.clixyz.yota.view
 
 import android.graphics.Rect
+import android.text.InputType
+import android.view.View
+import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Checkable
+import android.widget.EditText
+import android.widget.TextView
 import com.android.uiautomator.core.AccessibilityNodeInfoHelper
 import io.github.clixyz.yota.droid.Droid
 
-open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
+open class YotaView(val node: View, val idx: Int = 0) {
 
-    private var node: AccessibilityNodeInfo? = node
     private lateinit var childrenInternal: MutableList<YotaView>
     private lateinit var apInternal: MutableList<Attr>
 
     /* properties */
 
     val children: Array<YotaView>
-		get() {
-            cannotRecycled()
+        get() {
             if (!this::childrenInternal.isInitialized) {
                 childrenInternal = mutableListOf()
-                for (i in 0 until node!!.childCount) {
-                    val c = node!!.getChild(i)
-                    if (c != null) {
-                        childrenInternal.add(YotaView(c, i))
+                if (node is ViewGroup) {
+                    for (i in 0 until node.childCount) {
+                        val c = node.getChildAt(i)
+                        if (c != null) {
+                            childrenInternal.add(YotaView(c, i))
+                        }
                     }
                 }
             }
@@ -29,142 +35,159 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         }
 
     val srcNodeId: Long
-    get() {
-        cannotRecycled()
-        return node!!.sourceNodeId
-    }
+        get() {
+            cannotRecycled()
+            return AccessibilityNodeInfo.UNDEFINED_NODE_ID
+//        return node!!.sourceNodeId
+        }
 
     val pkg: String
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.packageName)
-    }
+        get() {
+            cannotRecycled()
+            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node.context.packageName)
+        }
 
     val cls: String
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.className)
-    }
+        get() {
+            cannotRecycled()
+            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node.accessibilityClassName)
+        }
 
     val text: String
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.text)
-    }
+        get() {
+            cannotRecycled()
+            return AccessibilityNodeInfoHelper.safeCharSequenceToString((node as TextView).text)
+        }
 
     val desc: String
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.contentDescription)
-    }
+        get() {
+            cannotRecycled()
+            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node.contentDescription)
+        }
+
 
     val resId: String
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.viewIdResourceName)
-    }
+        get() {
+            cannotRecycled()
+            return node.id.toString()
+//            return AccessibilityNodeInfoHelper.safeCharSequenceToString(node!!.viewIdResourceName)
+        }
 
-    val bounds: Rect?
-    get() {
-        cannotRecycled()
-        return AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(node)
-    }
+    val bounds: Rect
+        get() {
+            cannotRecycled()
+            val rect = Rect()
+            node.getBoundsOnScreen(rect)
+            return rect
+        }
+
 
     val enabled: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isEnabled
-    }
+        get() {
+            cannotRecycled()
+            return node.isEnabled
+        }
 
     val clickable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isClickable
-    }
+        get() {
+            cannotRecycled()
+            return node.isClickable
+        }
+
 
     val longClickable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isLongClickable
-    }
+        get() {
+            cannotRecycled()
+            return node.isLongClickable
+        }
 
     val contextClickable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isContextClickable
-    }
+        get() {
+            cannotRecycled()
+            return node.isContextClickable
+        }
 
     val scrollable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isScrollable
-    }
+        get() {
+            cannotRecycled()
+            return node.canScrollHorizontally(-1)
+                    || node.canScrollHorizontally(1)
+                    || node.canScrollVertically(-1)
+                    || node.canScrollVertically(1)
+        }
+
 
     val checkable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isCheckable
-    }
+        get() {
+            cannotRecycled()
+            return node is Checkable
+        }
 
     val checked: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isChecked
-    }
+        get() {
+            cannotRecycled()
+            return (node is Checkable) and (node as Checkable).isChecked
+        }
 
     val editable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isEditable
-    }
+        get() {
+            cannotRecycled()
+            return node is EditText
+        }
+
 
     val focusable: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isFocusable
-    }
+        get() {
+            cannotRecycled()
+            return node.isFocusable
+        }
 
     val focused: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isFocused
-    }
+        get() {
+            cannotRecycled()
+            return node.isFocused
+        }
 
     val password: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isPassword
-    }
+        get() {
+            cannotRecycled()
+            if (node is EditText) {
+                val type = node.inputType
+                return (type and InputType.TYPE_TEXT_VARIATION_PASSWORD) == InputType.TYPE_TEXT_VARIATION_PASSWORD
+            }
+            return false
+        }
 
     val selected: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isSelected
-    }
+        get() {
+            cannotRecycled()
+            return node.isSelected
+        }
 
     val visible: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isVisibleToUser
-    }
+        get() {
+            cannotRecycled()
+            return node.isVisibleToUser
+        }
+
 
     val importantForA11y: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isImportantForAccessibility
-    }
+        get() {
+            cannotRecycled()
+            return node.isImportantForAccessibility
+        }
 
     val contentInvalid: Boolean
-    get() {
-        cannotRecycled()
-        return node!!.isContentInvalid
-    }
+        get() {
+            cannotRecycled()
+            return false
+        }
 
     val attrPath: AttrPath
-    get() {
-        cannotRecycled()
-        return attrPath(-1)
-    }
+        get() {
+            cannotRecycled()
+            return attrPath(-1)
+        }
 
     fun attrPath(len: Int): AttrPath {
         cannotRecycled()
@@ -182,7 +205,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun tap(): Boolean {
         cannotRecycled()
-        val bounds = node!!.boundsInScreen ?: return false
         return Droid.exec {
             it.im.tap(bounds.centerX().toFloat(), bounds.centerY().toFloat())
         }
@@ -190,8 +212,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun tap(offX: Float, offY: Float): Boolean {
         cannotRecycled()
-
-        val bounds = node!!.boundsInScreen ?: return false
 
         val x = bounds.left.toFloat() + offX
         val y = bounds.top.toFloat() + offY
@@ -205,7 +225,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun longTap(): Boolean {
         cannotRecycled()
-        val bounds = node!!.boundsInScreen ?: return false
         return Droid.exec {
             it.im.longTap(bounds.centerX().toFloat(), bounds.centerY().toFloat())
         }
@@ -213,8 +232,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun longTap(offX: Float, offY: Float): Boolean {
         cannotRecycled()
-
-        val bounds = node!!.boundsInScreen ?: return false
 
         val x = bounds.left + offX
         val y = bounds.top + offY
@@ -228,7 +245,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun swipe(dX: Float, dY: Float, duration: Long): Boolean {
         cannotRecycled()
-        val bounds = node!!.boundsInScreen ?: return false
         val fromX = bounds.centerX().toFloat()
         val fromY = bounds.centerY().toFloat()
         val toX = fromX + dX
@@ -238,7 +254,6 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
 
     fun swipe(offX: Float, offY: Float, dX: Float, dY: Float, duration: Long): Boolean {
         cannotRecycled()
-        val bounds = node!!.boundsInScreen ?: return false
         val fromX = bounds.left + offX
         val fromY = bounds.top + offY
         val toX = fromX + dX
@@ -250,31 +265,35 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
         }
     }
 
-    fun recycle() {
-        node!!.recycle()
-        node = null
-    }
+//    fun recycle() {
+//        node!!.recycle()
+//        node = null
+//    }
 
     private fun calcAttrPath() {
         apInternal = mutableListOf()
         var cur = node
-        while (cur != null) {
-            apInternal.add(Attr(
-                AccessibilityNodeInfoHelper.safeCharSequenceToString(cur.packageName),
-                AccessibilityNodeInfoHelper.getIndex(cur)
-            ))
-            cur = cur.parent
+        while (true) {
+            apInternal.add(
+                Attr(
+                    cur.context.packageName,
+                    idx
+                )
+            )
+            cur = cur.parent as View
+            if (cur == cur.parent) {
+                break
+            }
         }
     }
 
     @Throws(AlreadyRecycledException::class)
     private fun cannotRecycled() {
-        if (node == null) {
-            throw AlreadyRecycledException()
-        }
     }
 
+
     data class Attr(val cls: String, val idx: Int)
+
 
     class AttrPath(view: YotaView, path: List<Attr>) {
         val view = view
@@ -288,16 +307,16 @@ open class YotaView(node: AccessibilityNodeInfo, val idx: Int = 0) {
             builder.append("[")
             for (i in 0 until size - 1) {
                 builder.append("<")
-                        .append(path[i].idx)
-                        .append(",")
-                        .append(path[i].cls)
-                        .append(">,")
+                    .append(path[i].idx)
+                    .append(",")
+                    .append(path[i].cls)
+                    .append(">,")
             }
             builder.append("<")
-                    .append(path[path.size - 1].idx)
-                    .append(",")
-                    .append(path[path.size - 1].cls)
-                    .append(">")
+                .append(path[path.size - 1].idx)
+                .append(",")
+                .append(path[path.size - 1].cls)
+                .append(">")
             builder.append("]")
             return builder.toString()
         }

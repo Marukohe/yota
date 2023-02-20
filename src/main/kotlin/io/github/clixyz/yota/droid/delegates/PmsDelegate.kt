@@ -1,7 +1,7 @@
 package io.github.clixyz.yota.droid.delegates
 
+import android.app.ActivityThread
 import android.content.pm.IPackageManager
-import android.os.ServiceManager
 import io.github.clixyz.yota.droid.DroidDelegate
 
 class PmsDelegate(private val pm: IPackageManager)
@@ -13,8 +13,8 @@ class PmsDelegate(private val pm: IPackageManager)
 
                 @Throws(DroidDelegate.UnableToFetchException::class)
                 override fun doFetch(): PmsDelegate = try {
-                    PmsDelegate(IPackageManager.Stub.asInterface(
-                            ServiceManager.getService("package")))
+                    // r9c shadowed ActivityThread#getPackageManager, this method will return a proxy
+                    PmsDelegate(ActivityThread.getPackageManager())
                 } catch (t: Throwable) {
                     throw DroidDelegate.UnableToFetchException("package manager service")
                 }

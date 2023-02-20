@@ -1,10 +1,10 @@
 package io.github.clixyz.yota.droid.delegates
 
-import android.app.ActivityManagerNative
 import android.app.IActivityManager
 import android.content.ComponentName
 import android.os.RemoteException
 import io.github.clixyz.yota.droid.DroidDelegate
+import io.github.clixyz.yota.droid.getActivityManager
 
 class AmsDelegate(private val am: IActivityManager)
     : DroidDelegate, IActivityManager by am {
@@ -14,11 +14,12 @@ class AmsDelegate(private val am: IActivityManager)
             get() = object : DroidDelegate.SingletonFetcher<AmsDelegate>() {
 
                 @Throws(DroidDelegate.UnableToFetchException::class)
-                override fun doFetch(): AmsDelegate = try {
-                    AmsDelegate(ActivityManagerNative.getDefault())
-                } catch (t: Throwable) {
-                    throw DroidDelegate.UnableToFetchException("activity manager service")
-                }
+                override fun doFetch(): AmsDelegate = AmsDelegate(getActivityManager())
+//                override fun doFetch(): AmsDelegate = try {
+//                    AmsDelegate(getActivityManager())
+//                } catch (t: Throwable) {
+//                    throw DroidDelegate.UnableToFetchException("activity manager service")
+//                }
             }
     }
 

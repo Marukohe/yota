@@ -17,6 +17,7 @@ import io.github.clixyz.yota.view.accessors.YotaViewFilter
 import io.github.clixyz.yota.view.accessors.YotaViewOrder
 import io.github.clixyz.yota.view.accessors.accept
 import org.json.simple.JSONObject
+import org.robolectric.server.wm.WindowManagerServiceDelegate
 import java.io.*
 import java.util.*
 
@@ -31,7 +32,8 @@ object UiAutoDelegate {
     private lateinit var ua: UiAutomation
 
     val connected: Boolean
-        get() = this::ht.isInitialized && ht.isAlive
+        get() = true
+//        get() = this::ht.isInitialized && ht.isAlive
 
     var compressed: Boolean = false
         set(value) {
@@ -50,8 +52,9 @@ object UiAutoDelegate {
 
     val rootView: YotaView?
         get() {
-            mustConnected()
-            val root = ua.rootInActiveWindow
+            val root =  WindowManagerServiceDelegate.getInstance().disPlayView
+//            mustConnected()
+//            val root = ua.rootInActiveWindow
             return if (root == null) {
                 null
             } else {
@@ -82,10 +85,11 @@ object UiAutoDelegate {
         NullRootException::class
     )
     fun findView(selector: BySelector): YotaView? {
-        mustConnected()
-        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
-        val node = ByMatcher.findMatch(UiDevice.getInstance(), selector, root)
-        return node?.let { YotaView(it) }
+        return null
+//        mustConnected()
+//        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
+//        val node = ByMatcher.findMatch(UiDevice.getInstance(), selector, root)
+//        return node?.let { YotaView(it) }
     }
 
     @Throws(
@@ -93,14 +97,15 @@ object UiAutoDelegate {
         NullRootException::class
     )
     fun findViews(selector: BySelector): List<YotaView> {
-        mustConnected()
-        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
-        val nodes = ByMatcher.findMatches(UiDevice.getInstance(), selector, root)
-        return if (nodes.isEmpty()) {
-            arrayListOf()
-        } else {
-            nodes.map { n -> YotaView(n) }
-        }
+        return arrayListOf()
+//        mustConnected()
+//        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: throw NullRootException()
+//        val nodes = ByMatcher.findMatches(UiDevice.getInstance(), selector, root)
+//        return if (nodes.isEmpty()) {
+//            arrayListOf()
+//        } else {
+//            nodes.map { n -> YotaView(n) }
+//        }
     }
 
     @Throws(
@@ -144,16 +149,17 @@ object UiAutoDelegate {
     fun checkSystemDialog(): Int {
         mustConnected()
         // TODO crash/anr checking is not sound
-        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: return SYSTEM_DIALOG_NORMAL
-        if ("android" != charSeqToStr(root.packageName)) {
-            return NOT_SYSTEM_DIALOG
-        }
+//        val root: AccessibilityNodeInfo = ua.rootInActiveWindow ?: return SYSTEM_DIALOG_NORMAL
+//        if ("android" != charSeqToStr(root.packageName)) {
+//            return NOT_SYSTEM_DIALOG
+//        }
 
-        val rootView = YotaView(root)
+//        val rootView = YotaView(root)
+//        val rootView = rootView
         val filter = YotaViewFilter { view ->
             "android.widget.TextView" == view.cls || "android.widget.Button" == view.cls
         }
-        rootView.accept(YotaViewOrder.DFS, filter)
+        rootView?.accept(YotaViewOrder.DFS, filter)
 
         for (view in filter) {
             val text = view.text.toLowerCase()

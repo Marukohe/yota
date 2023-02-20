@@ -6,6 +6,7 @@ import android.content.pm.ResolveInfo
 import android.os.RemoteException
 import android.os.UserHandle
 import android.view.KeyEvent
+import edu.nju.ics.marukohe.metroid.Device
 import io.github.clixyz.yota.droid.Droid
 import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
 import io.github.clixyz.yota.events.*
@@ -14,7 +15,7 @@ import io.github.clixyz.yota.utils.Logger
 import io.github.clixyz.yota.utils.OptParser
 import java.io.PrintStream
 
-class YotaMnky(val stateDir: String) : Command {
+class YotaMnky(val stateDir: String, val device: Device?) : Command {
     override val name: String = "mnky"
     override val usage: String by lazy {
         "mnky: a monkey-like tool that removes redundant events\n" +
@@ -184,7 +185,8 @@ class YotaMnky(val stateDir: String) : Command {
 
             val ua = Droid.ua
             val am = Droid.am
-            val fapp = am.foregroundAppName
+//            val fapp = am.foregroundAppName
+            val fapp = appPackage
             when (fapp) {
                 null -> { // maybe something is running in foreground
                     Logger.w("App is doing some tasks, e.g., networking")
@@ -514,9 +516,10 @@ class YotaMnky(val stateDir: String) : Command {
                 Logger.e("No main activity found")
                 return false
             }
-        } else if (activity!!.startsWith(".")) {
-            activity = appPackage + activity
         }
+//        else if (activity!!.startsWith(".")) {
+//            activity = appPackage + activity
+//        }
 
         random = MnkyRandom(seed)
 
@@ -543,45 +546,46 @@ class YotaMnky(val stateDir: String) : Command {
     }
 
     private fun findActivity(): String? {
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_LAUNCHER)
-
-        val mainActList: List<ResolveInfo>
-        try {
-            val actList = Droid.pm.queryIntentActivities(intent, null, 0,
-                    UserHandle.myUserId()).list
-            if (actList == null || actList.isEmpty()) {
-                Logger.e("No ACTION_MAIN/CATEGORY_LAUNCHER-ed activities found")
-                return null
-            }
-
-            mainActList = actList
-                    .filter { r ->
-                        r is ResolveInfo && appPackage == r.activityInfo?.applicationInfo?.packageName
-                    }
-                    .map { r ->
-                        r as ResolveInfo
-                    }
-
-            if (mainActList.isEmpty()) {
-                Logger.e("No ACTION_MAIN/CATEGORY_LAUNCHER-ed activities found in $appPackage")
-                return null
-            }
-        } catch (e: RemoteException) {
-            e.message?.let(Logger::e)
-            e.stackTrace?.let(Logger::e)
-            return null
-        }
-
-        val info: ResolveInfo
-        info = if (mainActList.size != 1) {
-            Logger.w("Multiple main activities found, use random one")
-            mainActList[random.nextInt(mainActList.size)]
-        } else {
-            mainActList[0]
-        }
-
-        return info.activityInfo.name
+        return device?.app?.findMainActivity()
+//        val intent = Intent(Intent.ACTION_MAIN)
+//        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+//
+//        val mainActList: List<ResolveInfo>
+//        try {
+//            val actList = Droid.pm.queryIntentActivities(intent, null, 0,
+//                    UserHandle.myUserId()).list
+//            if (actList == null || actList.isEmpty()) {
+//                Logger.e("No ACTION_MAIN/CATEGORY_LAUNCHER-ed activities found")
+//                return null
+//            }
+//
+//            mainActList = actList
+//                    .filter { r ->
+//                        r is ResolveInfo && appPackage == r.activityInfo?.applicationInfo?.packageName
+//                    }
+//                    .map { r ->
+//                        r as ResolveInfo
+//                    }
+//
+//            if (mainActList.isEmpty()) {
+//                Logger.e("No ACTION_MAIN/CATEGORY_LAUNCHER-ed activities found in $appPackage")
+//                return null
+//            }
+//        } catch (e: RemoteException) {
+//            e.message?.let(Logger::e)
+//            e.stackTrace?.let(Logger::e)
+//            return null
+//        }
+//
+//        val info: ResolveInfo
+//        info = if (mainActList.size != 1) {
+//            Logger.w("Multiple main activities found, use random one")
+//            mainActList[random.nextInt(mainActList.size)]
+//        } else {
+//            mainActList[0]
+//        }
+//
+//        return info.activityInfo.name
     }
 
     private fun showUsage(out: PrintStream) {

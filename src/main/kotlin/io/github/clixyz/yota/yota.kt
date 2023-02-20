@@ -49,7 +49,7 @@ private val COMMANDS: Array<Command> = arrayOf(
         YotaInput(),
         YotaInfo(),
         YotaSelect(),
-        YotaMnky("/data/local/tmp")
+        YotaMnky("/data/local/tmp", null)
 )
 
 private fun showUsage(out: PrintStream) {

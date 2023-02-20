@@ -102,14 +102,14 @@ class Main : MetroidStarter() {
             override fun onFirstActivityReady(appInstalledTime: Long) {
                 val monkeyArgs = mutableListOf(
                     "-p", System.getProperty("running_app_pkg"),
-                    "10"
+                    "-C", "10"
                 )
 //                monkeyArgs.add("--start-up-time")
 //                monkeyArgs.add(appInstalledTime.toString())
 //                monkeyArgs.add("100000000")
 //                monkeyArgs.add("-p $pkgName")
 //                monkeyArgs.add("10")
-                exitProcess(YotaMnky("/data/local/tmp").exec(monkeyArgs.toTypedArray()).code)
+                exitProcess(YotaMnky("/data/local/tmp", device).exec(monkeyArgs.toTypedArray()).code)
             }
 
             override fun onActivityChanged() {}
