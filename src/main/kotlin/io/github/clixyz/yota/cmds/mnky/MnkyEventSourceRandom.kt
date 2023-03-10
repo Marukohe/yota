@@ -1,6 +1,5 @@
 package io.github.clixyz.yota.cmds.mnky
 
-import android.graphics.Point
 import android.graphics.Rect
 import android.view.KeyEvent
 import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
@@ -20,13 +19,17 @@ class MnkyEventSourceRandom(
 
     private val textFuzzer = TextFuzzer(random)
     private val clickable = YotaViewFilter { v ->
-        v.visible && v.clickable
+//        v.visible && v.clickable
+        v.clickable
+//        true
     }
     private val editable = YotaViewFilter { v ->
-        v.visible && v.editable
+//        v.visible && v.editable
+        v.editable
     }
     private val scrollable = YotaViewFilter { v ->
-        v.visible && v.scrollable
+//        v.visible && v.scrollable
+        v.scrollable
     }
 
     private var lastEvent: YotaEvent? = null
@@ -47,12 +50,12 @@ class MnkyEventSourceRandom(
         editable.clear()
         scrollable.clear()
 
-        if (lastEvent != null && lastEvent is YotaTextEvent) {
-            // if a text is sent, then an ENTER is sent by proba
-            if (random.nextDouble() < proba.enterAfterText) {
-                return keyEvent(KeyEvent.KEYCODE_BACK)
-            }
-        }
+//        if (lastEvent != null && lastEvent is YotaTextEvent) {
+//            // if a text is sent, then an ENTER is sent by proba
+//            if (random.nextDouble() < proba.enterAfterText) {
+//                return keyEvent(KeyEvent.KEYCODE_BACK)
+//            }
+//        }
 
         // sometimes, an app will fall into a dialog, or some
         // pages, it is difficult for themselves to jump out
@@ -68,6 +71,10 @@ class MnkyEventSourceRandom(
 
         // root is null, then drop current event
         val rootView = ua.rootView ?: return null
+
+        if (rootView.node.viewRootImpl.title.contains("MetroidBaseActivity")) {
+            return noopEvent()
+        }
 
         val CLICKABLE_FILTER_INDEX = 0
         val SCROLLABLE_FILETER_INDEX = 1

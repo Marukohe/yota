@@ -1,8 +1,25 @@
 package io.github.clixyz.yota.events
 
+import android.view.View
 import io.github.clixyz.yota.droid.Droid
 
-open class YotaTapEvent(val x: Float, val y: Float) : YotaEvent {
+open class YotaTapEvent : YotaEvent {
+    val view: View?
+    val x: Float
+    val y: Float
+
+    constructor(view: View?) {
+        this.view = view
+        this.x = 0f
+        this.y = 0f
+    }
+
+    constructor(x: Float, y: Float) {
+        this.view = null
+        this.x = x
+        this.y = y
+    }
+
 
     companion object {
         fun mustFailEvent() = YotaTapEvent(-1f, -1f)

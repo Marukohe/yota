@@ -74,10 +74,11 @@ object UiAutoDelegate {
     }
 
     fun disconnect() {
-        if (connected) {
-            ua.disconnect()
-            ht.quit()
-        }
+        return
+//        if (connected) {
+//            ua.disconnect()
+//            ht.quit()
+//        }
     }
 
     @Throws(

@@ -1,18 +1,12 @@
 package io.github.clixyz.yota.cmds.mnky
 
 import android.content.ComponentName
-import android.content.Intent
-import android.content.pm.ResolveInfo
-import android.os.RemoteException
-import android.os.UserHandle
 import android.view.KeyEvent
 import edu.nju.ics.marukohe.metroid.Device
 import io.github.clixyz.yota.droid.Droid
 import io.github.clixyz.yota.droid.delegates.UiAutoDelegate
 import io.github.clixyz.yota.events.*
-import io.github.clixyz.yota.utils.Command
-import io.github.clixyz.yota.utils.Logger
-import io.github.clixyz.yota.utils.OptParser
+import io.github.clixyz.yota.utils.*
 import java.io.PrintStream
 
 class YotaMnky(val stateDir: String, val device: Device?) : Command {
@@ -34,6 +28,7 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
         "       [--show-timestamp]\n" +
         "       [--show-activity]\n" +
         "       [--stop-on-exit]\n" +
+        "       [--running-minutes TIME]\n" +
         "       -p APP_PACKAGE\n" +
         "       -C COUNT\n" +
         "\n" +
@@ -65,7 +60,8 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
         "  --show-activity            show activity name of each fired events,\n" +
         "                             by default, don't show\n" +
         "  --stop-on-exit             stop mnky when app exit, either exited normally, or\n" +
-        "                             exited by send key BACK, by default, don't stop"
+        "                             exited by send key BACK, by default, don't stop\n" +
+        "  --running-minutes          monkey executing minutes"
     }
 
     companion object {
@@ -85,6 +81,9 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
     private lateinit var args: Array<String>
     private lateinit var appPackage: String
     private var count: Long = -1
+    private var mRemainingTime: Long = 0
+    private var mStartingTime: Long = 0
+    private var dumpTimeInterval: Long = 0
 
     // options (required)
     private var seed = System.currentTimeMillis()
@@ -118,6 +117,8 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
 
     override fun exec(args: Array<String>): Command.Status {
         this.args = args
+        this.mStartingTime = System.currentTimeMillis()
+        this.dumpTimeInterval = System.getProperty("coverage.dumpTimInterval").toLong()
 
         if (!processOptions()) {
             Logger.e("Failed to process options")
@@ -133,6 +134,8 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
             FAILED_CANNOT_INIT_DROID
         } finally {
             Droid.deinit()
+            Thread.sleep(2000)
+            calculateCoverage()
         }
     }
 
@@ -177,11 +180,19 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
         var startAppCounter = 0
         var isFirstAppStartup = true
         var lastEvent: YotaEvent? = null
+        var lastTimeDumped = System.currentTimeMillis()
 
         while (counter < count) {
             var ev: YotaEvent?
             var rt: Int? = null
             var timestamp: Long = System.currentTimeMillis()
+            if (timestamp >= mStartingTime + mRemainingTime) {
+                break
+            }
+            if (timestamp - lastTimeDumped > dumpTimeInterval) {
+                lastTimeDumped = timestamp
+                dump(System.currentTimeMillis())
+            }
 
             val ua = Droid.ua
             val am = Droid.am
@@ -194,6 +205,9 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
                 }
                 appPackage -> { // ok
                     ev = source.getNextEvent()
+                    if (ev is YotaNoopEvent) {
+                        ev = YotaStartActivityEvent(ComponentName(appPackage, activity))
+                    }
                 }
                 "android" -> { // system dialog is shown
                     rt = ua.checkSystemDialog()
@@ -265,11 +279,11 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
                             Logger.i("|activity| $activityName")
                         }
                     }
-                    if (showTimestamp) {
-                        Logger.i(":event: " + timestamp + " " + getEventDesc(ev))
-                    } else {
-                        Logger.i(":event: " + getEventDesc(ev))
-                    }
+//                    if (showTimestamp) {
+//                        Logger.i(":event: " + timestamp + " " + getEventDesc(ev))
+//                    } else {
+//                        Logger.i(":event: " + getEventDesc(ev))
+//                    }
                 }
             } else {
                 droppedCounter ++
@@ -336,6 +350,7 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
 
             counter ++
             lastEvent = ev
+            dump()
         }
     }
 
@@ -478,6 +493,20 @@ class YotaMnky(val stateDir: String, val device: Device?) : Command {
                         Logger.w("Invalid attribute path length $length, should be an integer, discard it")
                     }
 
+                }
+            } else if (opt == "--running-minutes") {
+                val t = parser.get(opt)
+                if (t == null || t.isEmpty()) {
+                    Logger.w("Invalid running minutes")
+                } else {
+                    var timeRemaining : Long
+                    try {
+                        timeRemaining = t.toLong()
+                        timeRemaining *= 60 * 1000
+                        mRemainingTime = timeRemaining
+                    } catch (e: NumberFormatException) {
+                        Logger.w("Invalid remaining running minutes: $t")
+                    }
                 }
             } else if (opt == "--save-state") {
                 saveState = true

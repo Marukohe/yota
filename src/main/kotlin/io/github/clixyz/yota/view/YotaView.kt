@@ -5,11 +5,13 @@ import android.text.InputType
 import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.Checkable
 import android.widget.EditText
 import android.widget.TextView
 import com.android.uiautomator.core.AccessibilityNodeInfoHelper
 import io.github.clixyz.yota.droid.Droid
+import org.robolectric.util.ReflectionHelpers
 
 open class YotaView(val node: View, val idx: Int = 0) {
 
@@ -56,7 +58,13 @@ open class YotaView(val node: View, val idx: Int = 0) {
     val text: String
         get() {
             cannotRecycled()
-            return AccessibilityNodeInfoHelper.safeCharSequenceToString((node as TextView).text)
+            return AccessibilityNodeInfoHelper.safeCharSequenceToString(
+                when (node) {
+                    is Button -> node.text
+                    is TextView -> node.text
+                    else -> "no text"
+                }
+            )
         }
 
     val desc: String
@@ -167,7 +175,7 @@ open class YotaView(val node: View, val idx: Int = 0) {
     val visible: Boolean
         get() {
             cannotRecycled()
-            return node.isVisibleToUser
+            return ReflectionHelpers.callInstanceMethod(View::class.java, node, "isVisibleToUser")
         }
 
 

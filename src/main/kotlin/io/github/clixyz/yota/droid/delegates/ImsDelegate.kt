@@ -7,6 +7,8 @@ import android.os.ServiceManager
 import android.os.SystemClock
 import android.view.*
 import io.github.clixyz.yota.droid.DroidDelegate
+import org.robolectric.shadow.api.Shadow
+import org.robolectric.shadows.ShadowInputManager
 
 class ImsDelegate(private val im: IInputManager)
     : DroidDelegate, IInputManager by im {
@@ -29,6 +31,11 @@ class ImsDelegate(private val im: IInputManager)
     private val keyCharacterMap = KeyCharacterMap.load(KeyCharacterMap.VIRTUAL_KEYBOARD)
 
     // tap
+
+//    fun tap(view: View): Boolean {
+//        val shadowInputManager = Shadow.extract<ShadowInputManager>(InputManager.getInstance())
+//        return shadowInputManager.tap(view)
+//    }
 
     fun tap(x: Float, y: Float): Boolean {
         val downAt = SystemClock.uptimeMillis()
@@ -152,7 +159,7 @@ class ImsDelegate(private val im: IInputManager)
 
     private fun injectInputEventWaitForFinish(event: InputEvent): Boolean {
         return try {
-            im.injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
+            InputManager.getInstance().injectInputEvent(event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH)
         } finally {
             event.recycle()
         }

@@ -4,7 +4,6 @@ import android.support.test.uiautomator.By
 import android.view.KeyEvent
 import io.github.clixyz.yota.utils.*
 import android.view.KeyEvent.keyCodeFromString
-import io.github.clixyz.yota.droid.Droid
 import io.github.clixyz.yota.events.*
 import io.github.clixyz.yota.utils.OptParser
 import io.github.clixyz.yota.utils.accessors.getTyped

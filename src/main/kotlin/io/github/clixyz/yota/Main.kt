@@ -6,6 +6,7 @@ import edu.nju.ics.marukohe.metroid.Metroid
 import edu.nju.ics.marukohe.metroid.MetroidStarter
 import edu.nju.ics.marukohe.metroid.utils.Options
 import io.github.clixyz.yota.cmds.mnky.YotaMnky
+import io.github.clixyz.yota.instrumentor.instrument
 import io.github.clixyz.yota.utils.*
 import org.robolectric.shadows.ShadowLog
 import org.robolectric.shadows.ShadowMediaPlayer
@@ -30,16 +31,17 @@ fun main(args: Array<String>) {
     }
 
     parseConfig(args[0])
-//    instrument()
+    instrument()
 
     val builder = Options.Builder()
     builder
         .setQualifiers(qualifier)
         .setSdk(sdk)
-//        .setApkPath(instrumentedApk)
-        .setApkPath("/Users/hewei/Workspace/yota/monkeyinstance/default/instrumentedApks/ac.robinson.mediaphone_51.apk")
+        .setApkPath(instrumentedApk)
+//        .setApkPath("/Users/hewei/Workspace/yota/monkeyinstance/default/instrumentedApks/ac.robinson.mediaphone_51.apk")
+//        .setApkPath("/Users/hewei/Workspace/yota/monkeyinstance/default/instrumentedApks/app-debug.apk")
         .setInstance(instanceName)
-        .setOverwriteJarfile(false)
+        .setOverwriteJarfile(true)
 //        .setScriptPath(scriptPath)
 
     Metroid.init(builder.build(), Main::class.java)
@@ -102,13 +104,16 @@ class Main : MetroidStarter() {
             override fun onFirstActivityReady(appInstalledTime: Long) {
                 val monkeyArgs = mutableListOf(
                     "-p", System.getProperty("running_app_pkg"),
-                    "-C", "10"
+                    "-C", "10000000",
+                    "--pct-last-page", "2",
+                    "--running-minutes", "5"
                 )
 //                monkeyArgs.add("--start-up-time")
 //                monkeyArgs.add(appInstalledTime.toString())
 //                monkeyArgs.add("100000000")
 //                monkeyArgs.add("-p $pkgName")
 //                monkeyArgs.add("10")
+//                Thread.sleep(5000)
                 exitProcess(YotaMnky("/data/local/tmp", device).exec(monkeyArgs.toTypedArray()).code)
             }
 
